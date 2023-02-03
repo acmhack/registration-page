@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Divider, Group, MultiSelect, NativeSelect, SelectItem, Stack, TextInput, Title } from '@mantine/core';
+import { Box, Button, Checkbox, Divider, Group, MultiSelect, NativeSelect, SelectItem, Stack, TextInput, Title, FileInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextPage } from 'next/types';
 import { useState } from 'react';
@@ -10,8 +10,15 @@ const ICEBREAKERS = {
 
 interface FormValues {
 	email: string;
-	fname: string;
+	fullname: string;
+	phonenumber: string;
 	school: string;
+	graduationyear: string;
+	major: string;
+	gender: string;
+	race: string[];
+	hackathoncount: string;
+	resume: File;
 	linkedin?: string;
 	github: string;
 	otherSites: string[];
@@ -28,7 +35,14 @@ const Application: NextPage = () => {
 	const form = useForm<FormValues & typeof ICEBREAKERS>({
 		initialValues: {
 			email: '',
-			fname: '',
+			fullname: '',
+			phonenumber: '',
+			graduationyear: '',
+			major: '',
+			gender: '',
+			race: [],
+			hackathoncount: '',
+			resume: Object(), //resume: new File([""], "filename"),
 			school: '',
 			linkedin: '',
 			github: '',
@@ -47,6 +61,39 @@ const Application: NextPage = () => {
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email')
 		}
 	});
+	const [gradyearOptions, setGradYear] = useState<SelectItem[]>([
+		{ value: 'Graduate', label: 'Graduate Student'},
+		{ value: '2023', label: '2023'},
+		{ value: '2024', label: '2024'},
+		{ value: '2025', label: '2025'},
+		{ value: '2026', label: '2026'},
+		{ value: '2027', label: '2027'},
+		{ value: '2028', label: '2028'},
+		{ value: 'Hgih School', label: "High School"}
+	]);
+	const [genderOptions, setGender] = useState<SelectItem[]>([
+		{ value: 'W', label: 'Woman'},
+		{ value: 'M', label: 'Man'},
+		{ value: 'T', label: 'Transgender'},
+		{ value: 'N', label: 'Non-binary/non-conforming'},
+		{ value: 'P', label: 'Prefer not to respond'}
+	]);
+	const [raceOptions, setRace] = useState<SelectItem[]>([
+		{ value: 'N', label: 'American Indian or Alaskan Native'},
+		{ value: 'A', label: 'Asian'},
+		{ value: 'B', label: 'Black or African-American'},
+		{ value: 'H', label: 'Hispanic or Latino'},
+		{ value: 'I', label: 'Native Hawaiian or other Pacific Islander'},
+		{ value: 'W', label: 'White or Caucasian'},
+		{ value: 'P', label: 'I prefer not to answer'}
+	]);
+	const [hackathonRanges, setHackathonRange] = useState<SelectItem[]>([
+		{ value: 'N', label: 'My first hackathon!'},
+		{ value: 'S', label: '1-3'},
+		{ value: 'M', label: '4-6'},
+		{ value: 'L', label: '7+'},
+	])
+	const [resumeFile, setResume] = useState<File | null>(null);
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
 	const [dietOptions, setDietOptions] = useState<SelectItem[]>([
 		{ value: 'N', label: 'None' },
@@ -73,8 +120,38 @@ const Application: NextPage = () => {
 				<form onSubmit={form.onSubmit((values) => console.log(values))}>
 					<Stack>
 						<TextInput withAsterisk label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
-						<TextInput label="Full Name" {...form.getInputProps('fname')} />
+						<TextInput label="Full Name" {...form.getInputProps('fullname')} />
+						<TextInput label="Phone Number" {...form.getInputProps('phonenumber')} />
 						<NativeSelect label="School" {...form.getInputProps('school')} data={['MST', 'Mizzou', 'More School']} />
+						<NativeSelect label="Graduation Year" {...form.getInputProps('graduationyear')} data={gradyearOptions} />
+						<TextInput label="Major" {...form.getInputProps('major')} />
+						<NativeSelect label="Gender" {...form.getInputProps('gender')} data={genderOptions} />
+						<MultiSelect
+							label="Race"
+							{...form.getInputProps('race')}
+							data={raceOptions}
+							searchable
+							creatable
+							getCreateLabel={(query) => query}
+							onCreate={(query) => {
+								const item = { value: query, label: query };
+								setRace([...raceOptions, { value: query, label: query }]);
+								return item;
+							}}
+						></MultiSelect>
+						<NativeSelect label="How many hackathons have you participated in?" {...form.getInputProps('hackathoncount')} data={hackathonRanges} />
+
+						{/* FileInput has a Capture prop has type boolean | "user" | "environment"
+							Add after we know hosting server and resume site api
+						*/}
+						<FileInput
+							label="Upload your resume. PDF only!"
+							description="Resume is optional, but highly encouraged for your application."
+							{...form.getInputProps('resume')}
+							placeholder="Submit resume"
+							accept="application/pdf"
+						/>
+
 						<TextInput label="LinkedIn" {...form.getInputProps('linkedin')} />
 						<TextInput withAsterisk label="GitHub" {...form.getInputProps('github')} />
 						<MultiSelect
