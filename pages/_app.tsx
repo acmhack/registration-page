@@ -1,10 +1,10 @@
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
+import Link from 'next/link';
 
 const NAV_LINK_STYLE: CSSObject = {
 	borderTop: '2px solid rgba(210, 80, 110, 0.5)',
-	padding: '0.75rem 1.5rem',
 	cursor: 'pointer',
 	position: 'relative',
 
@@ -23,6 +23,23 @@ const NAV_LINK_STYLE: CSSObject = {
 		left: 0,
 		height: '100%',
 		borderLeft: '8px solid #FF7090'
+	},
+
+	'& a, & button': {
+		color: 'white',
+		textDecoration: 'none',
+		padding: '0.75rem 1.5rem',
+		display: 'block'
+	},
+
+	'& button': {
+		background: 'none',
+		border: 'none',
+		cursor: 'pointer',
+		fontSize: '1rem',
+		fontWeight: 500,
+		textAlign: 'left',
+		width: '100%'
 	}
 };
 
@@ -48,18 +65,20 @@ export default function App(props: AppProps) {
 							<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
 							<Space h={50} />
 							<Navbar.Section className={router.route === '/' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								Dashboard
+								<Link href="/">Dashboard</Link>
 							</Navbar.Section>
 							<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								Application
+								<Link href="/application">Application</Link>
 							</Navbar.Section>
 							<Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								Team
+								<Link href="/team">Team</Link>
 							</Navbar.Section>
 							<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								Admin
+								<Link href="/admin">Admin</Link>
 							</Navbar.Section>
-							<Navbar.Section sx={NAV_LINK_STYLE}>Logout</Navbar.Section>
+							<Navbar.Section sx={NAV_LINK_STYLE}>
+								<button onClick={() => console.log('logging out')}>Logout</button>
+							</Navbar.Section>
 						</Navbar>
 					}>
 					<Component {...pageProps} />
