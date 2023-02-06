@@ -20,7 +20,7 @@ interface FormValues {
 	hackathoncount: string;
 	resume: File | null;
 	linkedin?: string;
-	github: string;
+	github?: string;
 	otherSites: string[];
 	dietRestrictions: string[];
 	discoveryMethod: string[];
@@ -61,7 +61,7 @@ const Application: NextPage = () => {
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
-			github: (value) => (/^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
+			github: (value) => (value === '' || value === undefined || /^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
 		}
 	});
 	const [raceOptions, setRace] = useState<SelectItem[]>([
@@ -98,11 +98,12 @@ const Application: NextPage = () => {
 			<Box sx={{ maxWidth: 600 }} mx="auto">
 				<form onSubmit={form.onSubmit((values) => console.log(values))}>
 					<Stack>
-						<TextInput withAsterisk label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
-						<TextInput label="Full Name" {...form.getInputProps('fullname')} />
-						<TextInput label="Phone Number" {...form.getInputProps('phonenumber')} />
-						<NativeSelect label="School" {...form.getInputProps('school')} data={['MST', 'Mizzou', 'More School']} />
+						<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
+						<TextInput required label="Full Name" {...form.getInputProps('fullname')} />
+						<TextInput required label="Phone Number" {...form.getInputProps('phonenumber')} />
+						<NativeSelect required label="School" {...form.getInputProps('school')} data={['MST', 'Mizzou', 'More School']} />
 						<NativeSelect
+							required
 							label="Graduation Year"
 							{...form.getInputProps('graduationyear')}
 							data={[
@@ -116,8 +117,9 @@ const Application: NextPage = () => {
 								{ value: 'High School', label: 'High School' }
 							]}
 						/>
-						<TextInput label="Major" {...form.getInputProps('major')} />
+						<TextInput required label="Major" {...form.getInputProps('major')} />
 						<NativeSelect
+							required
 							label="Gender"
 							{...form.getInputProps('gender')}
 							data={[
@@ -129,6 +131,7 @@ const Application: NextPage = () => {
 							]}
 						/>
 						<MultiSelect
+							required
 							label="Race"
 							{...form.getInputProps('race')}
 							data={raceOptions}
@@ -141,6 +144,7 @@ const Application: NextPage = () => {
 								return item;
 							}}></MultiSelect>
 						<NativeSelect
+							required
 							label="How many hackathons have you participated in?"
 							{...form.getInputProps('hackathoncount')}
 							data={[
@@ -163,7 +167,7 @@ const Application: NextPage = () => {
 						/>
 
 						<TextInput label="LinkedIn" {...form.getInputProps('linkedin')} />
-						<TextInput withAsterisk label="GitHub" {...form.getInputProps('github')} />
+						<TextInput label="GitHub" {...form.getInputProps('github')} />
 						<MultiSelect
 							label="Other Sites"
 							{...form.getInputProps('otherSites')}
@@ -188,18 +192,20 @@ const Application: NextPage = () => {
 								const item = { value: query, label: query };
 								setDietOptions([...dietOptions, { value: query, label: query }]);
 								return item;
-							}}></MultiSelect>
+							}}
+						/>
 
 						<Divider />
 
 						<Title order={3}>This year&apos;s PickHacks is all about entertainment, so please entertain us by answering these questions:</Title>
 						{Object.entries(ICEBREAKERS).map(([property, prompt]) => (
-							<TextInput key={property} label={prompt} {...form.getInputProps(property)} withAsterisk />
+							<TextInput required key={property} label={prompt} {...form.getInputProps(property)} withAsterisk />
 						))}
 
 						<Divider />
 
 						<MultiSelect
+							required
 							label="How did you hear about PickHacks?"
 							{...form.getInputProps('discoveryMethod')}
 							data={discoveryOptions}
