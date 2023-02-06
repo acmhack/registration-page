@@ -58,7 +58,10 @@ const Application: NextPage = () => {
 			adult: false
 		},
 		validate: {
-			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email')
+			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+			linkedin: (value) =>
+				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
+			github: (value) => (/^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
 		}
 	});
 	const [raceOptions, setRace] = useState<SelectItem[]>([
