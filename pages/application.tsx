@@ -69,7 +69,13 @@ const Application: NextPage = () => {
 		<div>
 			<Box sx={{ maxWidth: 1200 }} mx="auto">
 				<form onSubmit={form.onSubmit((values) => console.log(values))}>
-					<Stepper active={step} onStepClick={setStep}>
+					<Stepper
+						active={step}
+						onStepClick={(step: number) => {
+							if (!form.validate().hasErrors) {
+								setStep(step);
+							}
+						}}>
 						<Stepper.Step label="Personal Info">
 							<Box sx={{ maxWidth: 600 }} mx="auto">
 								<Stack>
@@ -106,7 +112,7 @@ const Application: NextPage = () => {
 								</Stack>
 							</Box>
 						</Stepper.Step>
-						<Stepper.Step label="Programming Experience">
+						<Stepper.Step label="Prior Experience">
 							<Box sx={{ maxWidth: 600 }} mx="auto">
 								<Stack>
 									<NativeSelect
@@ -138,9 +144,8 @@ const Application: NextPage = () => {
 											{ value: 'L', label: '7+' }
 										]}
 									/>
-									{/* FileInput has a Capture prop has type boolean | "user" | "environment"
-										Add after we know hosting server and resume site api
-									*/}
+									{/* TODO: FileInput has a Capture prop has type boolean | "user" | "environment"
+										Add after we know hosting server and resume site api */}
 									<FileInput
 										label="Upload your resume. PDF only!"
 										description="Resume is optional, but highly encouraged for your application."
