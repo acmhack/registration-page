@@ -35,7 +35,7 @@ const Application: NextPage = () => {
 			shirtSize: 'M',
 			hackathonCount: 'N',
 			resume: null,
-			school: 'MST',
+			school: '',
 			linkedin: '',
 			github: '',
 			otherSites: [],
@@ -49,6 +49,7 @@ const Application: NextPage = () => {
 		validate: {
 			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
+			school: (value) => (value === '' ? 'Please enter your school' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
@@ -57,7 +58,6 @@ const Application: NextPage = () => {
 	});
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
 	const [dietOptions, setDietOptions] = useState<SelectItem[]>([
-		{ value: 'N', label: 'None' },
 		{ value: 'T', label: 'Vegetarian' },
 		{ value: 'V', label: 'Vegan' },
 		{ value: 'G', label: 'Gluten Free' },
@@ -85,7 +85,7 @@ const Application: NextPage = () => {
 									<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
 									<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
 									<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
-									<NativeSelect required label="School" {...form.getInputProps('school')} data={['MST', 'Mizzou', 'Other School']} />
+									<TextInput required label="School" {...form.getInputProps('school')} />
 									<NativeSelect
 										required
 										label="Graduation Year"
