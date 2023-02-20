@@ -47,6 +47,8 @@ const Application: NextPage = () => {
 			mlhAgreement: false
 		},
 		validate: {
+			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
+			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
@@ -197,7 +199,7 @@ const Application: NextPage = () => {
 										required
 										label={
 											<>
-												I have read and agree to the{' '}
+												<span style={{ color: 'red' }}>*</span> I have read and agree to the{' '}
 												<a href="https://static.mlh.io/docs/mlh-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer">
 													MLH Code of Conduct.
 												</a>
@@ -209,17 +211,16 @@ const Application: NextPage = () => {
 										required
 										label={
 											<>
-												I authorize you to share my application/registration information for event administration, ranking, MLH
-												administration, pre- and post-event informational e-mails, and occasional messages about hackathons in-line
-												with the MLH Privacy Policy. I further I agree to the terms of both the
+												<span style={{ color: 'red' }}>*</span> I authorize you to share my application/registration information for
+												event administration, ranking, MLH administration, pre- and post-event informational e-mails, and occasional
+												messages about hackathons in-line with the MLH Privacy Policy. I further I agree to the terms of both the{' '}
 												<a
 													href="https://github.com/MLH/mlh-policies/tree/master/prize-terms-and-conditions"
 													target="_blank"
 													rel="noopener noreferrer">
-													{' '}
 													MLH Contest Terms and Conditions
 												</a>{' '}
-												and the
+												and the{' '}
 												<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
 													MLH Privacy Policy.
 												</a>
@@ -229,7 +230,12 @@ const Application: NextPage = () => {
 									/>
 									<Checkbox
 										required
-										label="I authorize MLH to send me pre- and post-event informational emails, which contain free credit and opportunities from their partners."
+										label={
+											<>
+												<span style={{ color: 'red' }}>*</span> I authorize MLH to send me pre- and post-event informational emails,
+												which contain free credit and opportunities from their partners.
+											</>
+										}
 										{...form.getInputProps('mlhAgreement')}
 									/>
 
