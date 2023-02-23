@@ -1,7 +1,9 @@
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, FileInput, Group, MultiSelect, NativeSelect, SelectItem, Stack, Stepper, Switch, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface FormValues {
 	firstName: string;
@@ -66,6 +68,16 @@ const Application: NextPage = () => {
 		{ value: 'H', label: 'Halal' }
 	]);
 	const [step, setStep] = useState<number>(0);
+	const { user } = useUser();
+	const router = useRouter();
+
+	useEffect(() => {
+		if (!user) {
+			router.replace('/api/auth/login');
+		} else {
+			console.log(user);
+		}
+	}, [user, router]);
 
 	return (
 		<div>
