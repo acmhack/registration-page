@@ -1,3 +1,4 @@
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -81,7 +82,9 @@ export default function App(props: AppProps) {
 							</Navbar.Section>
 						</Navbar>
 					}>
-					<Component {...pageProps} />
+					<UserProvider>
+						<Component {...pageProps} />
+					</UserProvider>
 				</AppShell>
 			</MantineProvider>
 		</>

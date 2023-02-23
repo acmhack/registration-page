@@ -1,7 +1,9 @@
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, Divider, FileInput, Group, MultiSelect, NativeSelect, SelectItem, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ICEBREAKERS = {
 	character: 'If you could be a fictional character for a day, who would you be and what would you do?',
@@ -92,6 +94,16 @@ const Application: NextPage = () => {
 		{ value: 'P', label: 'Professor/Class' },
 		{ value: 'I', label: 'Internet Search' }
 	]);
+	const { user } = useUser();
+	const router = useRouter();
+
+	useEffect(() => {
+		if (!user) {
+			router.replace('/api/auth/login');
+		} else {
+			console.log(user);
+		}
+	}, [user, router]);
 
 	return (
 		<div>
