@@ -1,7 +1,6 @@
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, FileInput, Group, MultiSelect, NativeSelect, SelectItem, Stack, Stepper, Switch, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { useEffect, useState } from 'react';
 
@@ -68,16 +67,13 @@ const Application: NextPage = () => {
 		{ value: 'H', label: 'Halal' }
 	]);
 	const [step, setStep] = useState<number>(0);
-	const { user } = useUser();
-	const router = useRouter();
+	const { user, isLoading } = useUser();
 
 	useEffect(() => {
-		if (!user) {
-			router.replace('/api/auth/login');
-		} else {
+		if (!isLoading) {
 			console.log(user);
 		}
-	}, [user, router]);
+	}, [user, isLoading]);
 
 	return (
 		<div>
@@ -271,5 +267,5 @@ const Application: NextPage = () => {
 	);
 };
 
-export default Application;
+export default withPageAuthRequired(Application, { returnTo: '/application' });
 
