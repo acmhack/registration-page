@@ -1,6 +1,6 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useState } from 'react';
-import { Title, Table, ScrollArea, UnstyledButton, Group, Text, TextInput } from '@mantine/core';
+import { Title, Table, ScrollArea, UnstyledButton, Group, Text, TextInput, AppShell, Navbar } from '@mantine/core';
 import { keys } from '@mantine/utils';
 import { NextPage } from 'next/types';
 import { useEffect } from 'react';
@@ -29,8 +29,9 @@ interface RowData {
 	data: RowData[];
   }
 
-  const testData: RowData = { name: "blob", email: "email", company: "company"}
-  const testArray: TableSortProps = { data: [testData] }
+  const testData1: RowData = { name: "blob", email: "email", company: "company"}
+  const testData2: RowData = { name: "python", email: "anEmail", company: "goooge"}
+  const testArray: TableSortProps = { data: [testData1, testData2] }
   
   interface ThProps {
 	children: React.ReactNode;
@@ -109,14 +110,19 @@ function TableSort({ data }: TableSortProps) {
 	  </tr>
 	));
   
+	//scuffed beyond compare
 	return (
-	  <ScrollArea>
-		<TextInput
+		<AppShell
+			navbar={<Navbar width={{ base: 300}} height={400} p="xs">
+				<TextInput
 		  placeholder="Search by any field"
 		  mb="md"
 		  value={search}
 		  onChange={handleSearchChange}
 		/>
+		</Navbar>}
+		>
+			<ScrollArea>
 		<Table
 		  horizontalSpacing="md"
 		  verticalSpacing="xs"
@@ -162,6 +168,8 @@ function TableSort({ data }: TableSortProps) {
 		  </tbody>
 		</Table>
 	  </ScrollArea>
+		</AppShell>
+	  
 	);
   }
 
@@ -176,8 +184,9 @@ const Admin: NextPage = () => {
 
 	return (
 		<div>
-			<Title>Admin Panel</Title>
+			<Title>Admin Panel</Title>			
 			{ TableSort(testArray) }
+			
 		</div>
 	);
 };
