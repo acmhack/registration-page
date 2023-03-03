@@ -1,7 +1,8 @@
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, FileInput, Group, MultiSelect, NativeSelect, SelectItem, Stack, Stepper, Switch, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface FormValues {
 	firstName: string;
@@ -66,6 +67,13 @@ const Application: NextPage = () => {
 		{ value: 'H', label: 'Halal' }
 	]);
 	const [step, setStep] = useState<number>(0);
+	const { user, isLoading } = useUser();
+
+	useEffect(() => {
+		if (!isLoading) {
+			console.log(user);
+		}
+	}, [user, isLoading]);
 
 	return (
 		<div>
@@ -259,5 +267,5 @@ const Application: NextPage = () => {
 	);
 };
 
-export default Application;
+export default withPageAuthRequired(Application, { returnTo: '/application' });
 
