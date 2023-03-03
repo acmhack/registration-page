@@ -1,4 +1,19 @@
-import { Box, Button, Checkbox, FileInput, Group, MultiSelect, NativeSelect, SelectItem, Stack, Stepper, Switch, TextInput } from '@mantine/core';
+import {
+	Box,
+	Button,
+	Checkbox,
+	FileInput,
+	Group,
+	MultiSelect,
+	NativeSelect,
+	NumberInput,
+	SelectItem,
+	Stack,
+	Stepper,
+	Switch,
+	Text,
+	TextInput
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextPage } from 'next/types';
 import { useState } from 'react';
@@ -7,9 +22,13 @@ interface FormValues {
 	firstName: string;
 	lastName: string;
 	email: string;
+	age: string;
 	phoneNumber: string;
+	country: string;
 	school: string;
-	graduationYear: string;
+	levelOfStudy: string;
+	graduationMonth: string;
+	graduationYear: number;
 	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 	dietRestrictions: string[];
 	hackathonCount: string;
@@ -24,18 +43,264 @@ interface FormValues {
 	mlhAgreement: boolean;
 }
 
+const countries = [
+	'United States',
+	'Afghanistan',
+	'Albania',
+	'Algeria',
+	'Andorra',
+	'Angola',
+	'Antigua and Barbuda',
+	'Argentina',
+	'Armenia',
+	'Australia',
+	'Austria',
+	'Azerbaijan',
+	'The Bahamas',
+	'Bahrain',
+	'Bangladesh',
+	'Barbados',
+	'Belarus',
+	'Belgium',
+	'Belize',
+	'Benin',
+	'Bhutan',
+	'Bolivia',
+	'Bosnia and Herzegovina',
+	'Botswana',
+	'Brazil',
+	'Brunei',
+	'Bulgaria',
+	'Burkina Faso',
+	'Burundi',
+	'Cabo Verde',
+	'Cambodia',
+	'Cameroon',
+	'Canada',
+	'Central African Republic',
+	'Chad',
+	'Chile',
+	'China',
+	'Colombia',
+	'Comoros',
+	'Congo, Democratic Republic of the',
+	'Congo, Republic of the',
+	'Costa Rica',
+	'Côte d’Ivoire',
+	'Croatia',
+	'Cuba',
+	'Cyprus',
+	'Czech Republic',
+	'Denmark',
+	'Djibouti',
+	'Dominica',
+	'Dominican Republic',
+	'East Timor (Timor-Leste)',
+	'Ecuador',
+	'Egypt',
+	'El Salvador',
+	'Equatorial Guinea',
+	'Eritrea',
+	'Estonia',
+	'Eswatini',
+	'Ethiopia',
+	'Fiji',
+	'Finland',
+	'France',
+	'Gabon',
+	'The Gambia',
+	'Georgia',
+	'Germany',
+	'Ghana',
+	'Greece',
+	'Grenada',
+	'Guatemala',
+	'Guinea',
+	'Guinea-Bissau',
+	'Guyana',
+	'Haiti',
+	'Honduras',
+	'Hungary',
+	'Iceland',
+	'India',
+	'Indonesia',
+	'Iran',
+	'Iraq',
+	'Ireland',
+	'Israel',
+	'Italy',
+	'Jamaica',
+	'Japan',
+	'Jordan',
+	'Kazakhstan',
+	'Kenya',
+	'Kiribati',
+	'Korea, North',
+	'Korea, South',
+	'Kosovo',
+	'Kuwait',
+	'Kyrgyzstan',
+	'Laos',
+	'Latvia',
+	'Lebanon',
+	'Lesotho',
+	'Liberia',
+	'Libya',
+	'Liechtenstein',
+	'Lithuania',
+	'Luxembourg',
+	'Madagascar',
+	'Malawi',
+	'Malaysia',
+	'Maldives',
+	'Mali',
+	'Malta',
+	'Marshall Islands',
+	'Mauritania',
+	'Mauritius',
+	'Mexico',
+	'Micronesia, Federated States of',
+	'Moldova',
+	'Monaco',
+	'Mongolia',
+	'Montenegro',
+	'Morocco',
+	'Mozambique',
+	'Myanmar (Burma)',
+	'Namibia',
+	'Nauru',
+	'Nepal',
+	'Netherlands',
+	'New Zealand',
+	'Nicaragua',
+	'Niger',
+	'Nigeria',
+	'North Macedonia',
+	'Norway',
+	'Oman',
+	'Pakistan',
+	'Palau',
+	'Panama',
+	'Papua New Guinea',
+	'Paraguay',
+	'Peru',
+	'Philippines',
+	'Poland',
+	'Portugal',
+	'Qatar',
+	'Romania',
+	'Russia',
+	'Rwanda',
+	'Saint Kitts and Nevis',
+	'Saint Lucia',
+	'Saint Vincent and the Grenadines',
+	'Samoa',
+	'San Marino',
+	'Sao Tome and Principe',
+	'Saudi Arabia',
+	'Senegal',
+	'Serbia',
+	'Seychelles',
+	'Sierra Leone',
+	'Singapore',
+	'Slovakia',
+	'Slovenia',
+	'Solomon Islands',
+	'Somalia',
+	'South Africa',
+	'Spain',
+	'Sri Lanka',
+	'Sudan',
+	'Sudan, South',
+	'Suriname',
+	'Sweden',
+	'Switzerland',
+	'Syria',
+	'Taiwan',
+	'Tajikistan',
+	'Tanzania',
+	'Thailand',
+	'Togo',
+	'Tonga',
+	'Trinidad and Tobago',
+	'Tunisia',
+	'Turkey',
+	'Turkmenistan',
+	'Tuvalu',
+	'Uganda',
+	'Ukraine',
+	'United Arab Emirates',
+	'United Kingdom',
+	'Uruguay',
+	'Uzbekistan',
+	'Vanuatu',
+	'Vatican City',
+	'Venezuela',
+	'Vietnam',
+	'Yemen',
+	'Zambia',
+	'Zimbabwe'
+];
+
+const levelsOfStudy: SelectItem[] = [
+	{
+		label: 'Less than Secondary/High School',
+		value: '<HS'
+	},
+	{
+		label: 'Secondary/High School',
+		value: 'HS'
+	},
+	{
+		label: 'Undergraduate University (2 year - community college or similar)',
+		value: 'UCC'
+	},
+	{
+		label: 'Undergraduate University (3+ year)',
+		value: 'UUG'
+	},
+	{
+		label: 'Graduate University (Masters, Professional, Doctoral, etc.)',
+		value: 'UG'
+	},
+	{
+		label: 'Code School/Bootcamp',
+		value: 'CSB'
+	},
+	{
+		label: 'Other Vocational/Trade Program/Apprenticeship',
+		value: 'VTPA'
+	},
+	{
+		label: 'Other',
+		value: 'O'
+	},
+	{
+		label: "I'm currently not a student",
+		value: 'NS'
+	},
+	{
+		label: 'Prefer not to answer',
+		value: 'NA'
+	}
+];
+
 const Application: NextPage = () => {
 	const form = useForm<FormValues>({
 		initialValues: {
 			firstName: '',
 			lastName: '',
 			email: '',
+			age: '18',
 			phoneNumber: '',
-			graduationYear: 'Graduate',
+			country: 'USA',
+			school: '',
+			levelOfStudy: 'University',
+			graduationYear: new Date().getFullYear(),
+			graduationMonth: '',
 			shirtSize: 'M',
 			hackathonCount: 'N',
 			resume: null,
-			school: '',
 			linkedin: '',
 			github: '',
 			otherSites: [],
@@ -49,8 +314,9 @@ const Application: NextPage = () => {
 		validate: {
 			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
-			school: (value) => (value === '' ? 'Please enter your school' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must in format xxxyyyzzzz'),
+			school: (value) => (value === '' ? 'Please enter your school' : null),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
 			github: (value) => (value === '' || value === undefined || /^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
@@ -84,23 +350,56 @@ const Application: NextPage = () => {
 									<TextInput required label="First Name" {...form.getInputProps('firstName')} />
 									<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
 									<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
-									<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
-									<TextInput required label="School" {...form.getInputProps('school')} />
 									<NativeSelect
 										required
-										label="Graduation Year"
-										{...form.getInputProps('graduationYear')}
-										data={[
-											{ value: 'Graduate', label: 'Graduate Student' },
-											{ value: '2023', label: '2023' },
-											{ value: '2024', label: '2024' },
-											{ value: '2025', label: '2025' },
-											{ value: '2026', label: '2026' },
-											{ value: '2027', label: '2027' },
-											{ value: '2028', label: '2028' },
-											{ value: 'High School', label: 'High School' }
-										]}
+										label="What is your age?"
+										data={['Prefer not to answer', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
+										{...form.getInputProps('age')}
 									/>
+									<NativeSelect
+										required
+										label="In which country do you currently reside?"
+										data={countries}
+										{...form.getInputProps('country')}
+									/>
+									<Group spacing={0}>
+										<TextInput
+											required
+											label="What school do you currently attend? If you're no longer a student, what school/university did you most recently graduate from?"
+											{...form.getInputProps('school')}
+										/>
+										<Text fz="xs">
+											Don&apos;t use abbreviations -- please write the full name of the school / university. Enter &quot;None&quot; if
+											you have never attended / graduated from a school/university.
+										</Text>
+									</Group>
+									<NativeSelect
+										required
+										label="In what type of educational institution are you currently enrolled in?"
+										data={levelsOfStudy}
+										{...form.getInputProps('levelOfStudy')}
+									/>
+									<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
+									<NativeSelect
+										required
+										label="Graduation Month"
+										data={[
+											'January',
+											'February',
+											'March',
+											'April',
+											'May',
+											'June',
+											'July',
+											'August',
+											'September',
+											'October',
+											'November',
+											'December'
+										]}
+										{...form.getInputProps('graduationMonth')}
+									/>
+									<NumberInput required label="Graduation Year" {...form.getInputProps('graduationYear')} />
 									<Group position="right" mt="md">
 										<Button
 											onClick={() => {
@@ -211,11 +510,14 @@ const Application: NextPage = () => {
 										required
 										label={
 											<>
-												<span style={{ color: 'red' }}>*</span> I authorize you to share my application/registration information for
-												event administration, ranking, MLH administration, pre- and post-event informational e-mails, and occasional
-												messages about hackathons in-line with the MLH Privacy Policy. I further I agree to the terms of both the{' '}
+												<span style={{ color: 'red' }}>*</span> I authorize you to share my application/registration information with
+												Major League Hacking for event administration, ranking, and MLH administration inline with the{' '}
+												<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
+													MLH Privacy Policy
+												</a>
+												. I further I agree to the terms of both the{' '}
 												<a
-													href="https://github.com/MLH/mlh-policies/tree/master/prize-terms-and-conditions"
+													href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md"
 													target="_blank"
 													rel="noopener noreferrer">
 													MLH Contest Terms and Conditions
@@ -229,11 +531,10 @@ const Application: NextPage = () => {
 										{...form.getInputProps('dataAgreement')}
 									/>
 									<Checkbox
-										required
 										label={
 											<>
-												<span style={{ color: 'red' }}>*</span> I authorize MLH to send me pre- and post-event informational emails,
-												which contain free credit and opportunities from their partners.
+												<span style={{ color: 'red' }}>*</span> “I authorize MLH to send me an email where I can further opt into the
+												MLH Hacker, Events, or Organizer Newsletters and other communications from MLH.
 											</>
 										}
 										{...form.getInputProps('mlhAgreement')}
