@@ -531,12 +531,8 @@ const Application: NextPage = () => {
 										{...form.getInputProps('dataAgreement')}
 									/>
 									<Checkbox
-										label={
-											<>
-												<span style={{ color: 'red' }}>*</span> “I authorize MLH to send me an email where I can further opt into the
-												MLH Hacker, Events, or Organizer Newsletters and other communications from MLH.
-											</>
-										}
+										label="I authorize MLH to send me an email where I can further opt into the MLH Hacker, Events, or Organizer
+												Newsletters and other communications from MLH"
 										{...form.getInputProps('mlhAgreement')}
 									/>
 
