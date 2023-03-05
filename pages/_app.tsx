@@ -1,3 +1,4 @@
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -25,21 +26,11 @@ const NAV_LINK_STYLE: CSSObject = {
 		borderLeft: '8px solid #FF7090'
 	},
 
-	'& a, & button': {
+	'& a': {
 		color: 'white',
 		textDecoration: 'none',
 		padding: '0.75rem 1.5rem',
 		display: 'block'
-	},
-
-	'& button': {
-		background: 'none',
-		border: 'none',
-		cursor: 'pointer',
-		fontSize: '1rem',
-		fontWeight: 500,
-		textAlign: 'left',
-		width: '100%'
 	}
 };
 
@@ -62,10 +53,12 @@ export default function App(props: AppProps) {
 				<AppShell
 					navbar={
 						<Navbar width={{ base: 300 }} bg="#E96281" style={{ color: 'white' }}>
-							<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
+							<Link href="/">
+								<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
+							</Link>
 							<Space h={50} />
-							<Navbar.Section className={router.route === '/' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								<Link href="/">Dashboard</Link>
+							<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+								<Link href="/dashboard">Dashboard</Link>
 							</Navbar.Section>
 							<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 								<Link href="/application">Application</Link>
@@ -77,11 +70,13 @@ export default function App(props: AppProps) {
 								<Link href="/admin">Admin</Link>
 							</Navbar.Section>
 							<Navbar.Section sx={NAV_LINK_STYLE}>
-								<button onClick={() => console.log('logging out')}>Logout</button>
+								<a href="/api/auth/logout">Logout</a>
 							</Navbar.Section>
 						</Navbar>
 					}>
-					<Component {...pageProps} />
+					<UserProvider>
+						<Component {...pageProps} />
+					</UserProvider>
 				</AppShell>
 			</MantineProvider>
 		</>
