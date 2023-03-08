@@ -1,7 +1,7 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useEffect, useState } from 'react';
-import { useDisclosure, useInterval } from '@mantine/hooks';
-import { Title, Text, Box, Center, Stack, Button, Modal, Group, Grid, Table, ScrollArea, UnstyledButton, TextInput, AppShell, Navbar } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Title, Text, Box, Center, Stack, Button, Modal, Group, Grid } from '@mantine/core';
 import { closeAllModals, openModal, modals } from '@mantine/modals';
 import { keys } from '@mantine/utils';
 import { NextPage } from 'next/types';
@@ -74,7 +74,8 @@ const Admin: NextPage = () => {
 
 	return (
 		<div>
-			<Title>Admin Panel</Title>	
+			<Title>Admin Panel</Title>
+
 			<DataTable
 				withBorder
 				withColumnBorders
@@ -86,12 +87,12 @@ const Admin: NextPage = () => {
 				records={records}
 				sortStatus={sortStatus}
 				onSortStatusChange={setSortStatus}
-				onRowClick={(people, rowIndex) => {
-					console.log("this is working")
+				onRowClick={(user, rowIndex) => {
+					console.log("this is working");
 					openModal({
 						title: 'Applicant Information',
 						styles: {
-							modal: { maxWidth: 200 },
+							modal: { maxWidth: 300 },
 						},
 						children: (
 							<Stack>
