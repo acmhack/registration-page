@@ -1,8 +1,8 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import { Title, Text, Box, Center, Stack, Button } from '@mantine/core';
-import { closeAllModals, openModal } from '@mantine/modals';
+import { Title, Text, Box, Center, Stack, Button, Modal, Group } from '@mantine/core';
+import { closeAllModals, openModal, modals } from '@mantine/modals';
 import { keys } from '@mantine/utils';
 import { NextPage } from 'next/types';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
@@ -40,7 +40,8 @@ const Admin: NextPage = () => {
 
 	return (
 		<div>
-			<Title>Admin Panel</Title>			
+			<Title>Admin Panel</Title>
+
 			<DataTable
 				withBorder
 				withColumnBorders
@@ -52,11 +53,11 @@ const Admin: NextPage = () => {
 				sortStatus={sortStatus}
 				onSortStatusChange={setSortStatus}
 				onRowClick={(people, rowIndex) => {
-					console.log("this is working")
+					console.log("this is working");
 					openModal({
 						title: 'Applicant Information',
 						styles: {
-							modal: { maxWidth: 200 },
+							modal: { maxWidth: 300 },
 						},
 						children: (
 							<Stack>
@@ -64,7 +65,7 @@ const Admin: NextPage = () => {
 									You clicked on row[{rowIndex}], referring to applicant <em>{people.firstname}</em>.
 								</Text>
 								<Center>
-									<Button sx={{ width: '100%', maxWidth: 100}} onClick={() => closeAllModals()}>
+									<Button sx={{ width: '100%', maxWidth: 100 }} onClick={() => closeAllModals()}>
 										OK
 									</Button>
 								</Center>

@@ -1,5 +1,6 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -50,6 +51,7 @@ export default function App(props: AppProps) {
 				theme={{
 					colorScheme: 'light'
 				}}>
+				<ModalsProvider>
 				<AppShell
 					navbar={
 						<Navbar width={{ base: 300 }} bg="#E96281" style={{ color: 'white' }}>
@@ -78,6 +80,7 @@ export default function App(props: AppProps) {
 						<Component {...pageProps} />
 					</UserProvider>
 				</AppShell>
+				</ModalsProvider>
 			</MantineProvider>
 		</>
 	);
