@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import { Title, Text, Box, Center, Stack, Button, Modal, Group } from '@mantine/core';
+import { Title, Text, Box, Center, Stack, Button, Modal, Group, Grid } from '@mantine/core';
 import { closeAllModals, openModal, modals } from '@mantine/modals';
 import { keys } from '@mantine/utils';
 import { NextPage } from 'next/types';
@@ -10,6 +10,7 @@ import axios from 'axios';
 
 import companies from './emails.json';
 import people from './people.json';
+import { update } from 'lodash';
 
 const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/'
 
@@ -19,6 +20,10 @@ const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/develop
 // 		responseType: "json",
 // 	})
 // 	.then( (response) => console.log(response) );
+
+const updateStatus = (id: string, status: string) => {
+	//axios.post()
+}
 
 const Admin: NextPage = () => {
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
@@ -48,18 +53,27 @@ const Admin: NextPage = () => {
 					openModal({
 						title: 'Applicant Information',
 						styles: {
-							modal: { maxWidth: 300 },
+							modal: { maxWidth: 400 },
 						},
 						children: (
 							<Stack>
 								<Text size="sm">
 									You clicked on row[{rowIndex}], referring to applicant <em>{people.firstname}</em>.
 								</Text>
-								<Center>
-									<Button sx={{ width: '100%', maxWidth: 100 }} onClick={() => closeAllModals()}>
-										OK
-									</Button>
-								</Center>
+								<Grid gutter="xs">
+									<Grid.Col span={3}>Name</Grid.Col>
+									<Grid.Col span={9}>{people.firstname}</Grid.Col>
+									<Grid.Col span={3}>Name2</Grid.Col>
+									<Grid.Col span={9}>{people.lastname}</Grid.Col>
+								</Grid>
+									<Group position="center">
+										<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${people.firstname}`, 'yeah')}> {/* jank lmao */}
+											Accept
+										</Button>
+										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus( `${people.firstname}`, 'nah')}>
+											Reject
+										</Button>
+									</Group>
 							</Stack>
 						),
 					});
