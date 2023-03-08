@@ -13,6 +13,7 @@ import { User, UserStatus, getApplicationsAsync } from './data';
 
 import companies from './emails.json';
 import people from './people.json';
+import { update } from 'lodash';
 
 const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/'
 
@@ -43,13 +44,6 @@ const getAllApplications = async () => {
 		console.log(err)
 	}
 };
-
-//const applicationData = 
-// axios
-// 	.get(endpoint + `items`, {
-// 		responseType: "json",
-// 	})
-// 	.then( (response) => console.log(response) );
 
 const Admin: NextPage = () => {
 	const { user, isLoading } = useUser();
@@ -92,7 +86,7 @@ const Admin: NextPage = () => {
 					openModal({
 						title: 'Applicant Information',
 						styles: {
-							modal: { maxWidth: 300 },
+							modal: { maxWidth: 400 },
 						},
 						children: (
 							<Stack>
