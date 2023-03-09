@@ -1,6 +1,6 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useEffect, useState } from 'react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useInterval } from '@mantine/hooks';
 import { Title, Text, Box, Center, Stack, Button, Modal, Group, Grid } from '@mantine/core';
 import { closeAllModals, openModal, modals } from '@mantine/modals';
 import { keys } from '@mantine/utils';
@@ -10,10 +10,6 @@ import sortBy from 'lodash/sortBy';
 import axios from 'axios';
 
 import { User, UserStatus, getApplicationsAsync } from './data';
-
-import companies from './emails.json';
-import people from './people.json';
-import { update } from 'lodash';
 
 const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/'
 
@@ -82,7 +78,6 @@ const Admin: NextPage = () => {
 				sortStatus={sortStatus}
 				onSortStatusChange={setSortStatus}
 				onRowClick={(user, rowIndex) => {
-					console.log("this is working");
 					openModal({
 						title: 'Applicant Information',
 						styles: {
