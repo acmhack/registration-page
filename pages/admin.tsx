@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useInterval } from '@mantine/hooks';
 import { Title, Text, Box, Center, Stack, Button, Modal, Group, Grid } from '@mantine/core';
 import { closeAllModals, openModal, modals } from '@mantine/modals';
 import { keys } from '@mantine/utils';
@@ -8,31 +8,38 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 import axios from 'axios';
 
-import companies from './emails.json';
-import people from './people.json';
-import { update } from 'lodash';
+import { User, UserStatus, getApplicationsAsync } from './data';
 
 const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/'
 
-//const applicationData = 
-// axios
-// 	.get(endpoint + `items`, {
-// 		responseType: "json",
-// 	})
-// 	.then( (response) => console.log(response) );
+// debugging
+// const applications = getApplicationsAsync()
+// applications.then(data => {
+// 		console.log(data);
+// }, console.error)
 
-const updateStatus = (id: string, status: string) => {
-	//axios.post()
+const updateStatus = async (id: string, userStatus: UserStatus) => {
+	console.log("We're here")
+	const resp = await axios.get(endpoint + `items${id}`, {
+			responseType: "json",
+		});
+	const currentData : User = resp.data;
+	currentData.userstatus = userStatus;
+	axios.put(endpoint + `items` , currentData)
 }
 
 const Admin: NextPage = () => {
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-	const [records, setRecords] = useState(sortBy(people, 'name'))
+	const [records, setRecords] = useState<User[]>([])
 
 	useEffect(() => {
-		const data = sortBy(people, sortStatus.columnAccessor);
+		const data = sortBy(records, sortStatus.columnAccessor);
 		setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
 	}, [sortStatus]);
+
+	useEffect(() => { //jank one time run
+		getApplicationsAsync().then(setRecords);
+	}, []);
 
 	return (
 		<div>
@@ -44,12 +51,12 @@ const Admin: NextPage = () => {
 				columns={[
 					{ accessor: 'name', width: '40%', sortable: true, render: ({ firstname, lastname }) => `${firstname} ${lastname}`,},
 					{ accessor: 'email', width: '20%', sortable: true },
+					{ accessor: 'userstatus', width: '20%', sortable: true },
 				]}
 				records={records}
 				sortStatus={sortStatus}
 				onSortStatusChange={setSortStatus}
-				onRowClick={(people, rowIndex) => {
-					console.log("this is working");
+				onRowClick={(user, rowIndex) => {
 					openModal({
 						title: 'Applicant Information',
 						styles: {
@@ -58,19 +65,19 @@ const Admin: NextPage = () => {
 						children: (
 							<Stack>
 								<Text size="sm">
-									You clicked on row[{rowIndex}], referring to applicant <em>{people.firstname}</em>.
+									You clicked on row[{rowIndex}], referring to applicant <em>{user.firstname}</em>.
 								</Text>
 								<Grid gutter="xs">
 									<Grid.Col span={3}>Name</Grid.Col>
-									<Grid.Col span={9}>{people.firstname}</Grid.Col>
+									<Grid.Col span={9}>{user.firstname}</Grid.Col>
 									<Grid.Col span={3}>Name2</Grid.Col>
-									<Grid.Col span={9}>{people.lastname}</Grid.Col>
+									<Grid.Col span={9}>{user.lastname}</Grid.Col>
 								</Grid>
 									<Group position="center">
-										<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${people.firstname}`, 'yeah')}> {/* jank lmao */}
-											Accept
+										<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${user.id}`, 'Admitted')}>
+											Admit
 										</Button>
-										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus( `${people.firstname}`, 'nah')}>
+										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus( `${user.id}`, 'Denied')}>
 											Reject
 										</Button>
 									</Group>
