@@ -34,9 +34,15 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 	switch (req.method) {
 		case 'GET': {
-			const response = await axios.get('https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items');
+			const user = (await axios.get<DBEntry>(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`)).data;
 
-			return res.status(200).json(response.data);
+			if (user.admin) {
+				const response = await axios.get('https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items');
+
+				return res.status(200).json(response.data);
+			} else {
+				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
+			}
 		}
 		case 'POST': {
 			const {
