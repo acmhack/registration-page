@@ -48,3 +48,4 @@ interface DBEntry {
 	mlhcommunication: boolean;
 	mlhlogistics: boolean;
 }
+

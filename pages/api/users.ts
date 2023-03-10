@@ -2,6 +2,32 @@ import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+interface DBEntry {
+	id: string;
+	admin: boolean;
+	userstatus: string;
+	firstname: string;
+	lastname: string;
+	email: string;
+	age: string;
+	phone: string;
+	country: string;
+	school: string;
+	levelofstudy: string;
+	gradyear: string;
+	gradmonth: string;
+	shirtsize: string;
+	resume: string | null;
+	diet: string;
+	experience: string;
+	links: string;
+	prehacks: boolean;
+	lft: boolean;
+	mlhcodeofconduct: boolean;
+	mlhcommunication: boolean;
+	mlhlogistics: boolean;
+}
+
 export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
 	const session = await getSession(req, res);
 	const id = session!.user.sub;
