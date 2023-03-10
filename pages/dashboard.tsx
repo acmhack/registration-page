@@ -1,5 +1,5 @@
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import { Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
+import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -9,45 +9,29 @@ import { FC, useEffect, useState } from 'react';
 import { calculateRemainingTime } from '../utils/utils';
 
 interface Applicant {
-	profile: {
-		adult: boolean;
-		codeAgreement: boolean;
-		dataAgreement: boolean;
-		name: string;
-		phone: string;
-		school: string;
-		graduationYear: string;
-		major: string;
-		participationCount: 'N' | 'S' | 'M' | 'L';
-		diet: string;
-		resume: boolean;
-		travel: 'F';
-		attendingPrehacks: boolean;
-	};
-	confirmation: {
-		dietaryRestrictions: string[];
-		signaturePhotoRelease: string;
-		dateSig: string;
-	};
-	status: {
-		completedProfile: boolean;
-		admitted: boolean;
-		confirmed: boolean;
-		declined: boolean;
-		checkedIn: boolean;
-		reimbursementGiven: boolean;
-		admittedBy: string;
-		confirmBy: number;
-		rejected: boolean;
-		checkInTime: number;
-	};
-	admin: boolean;
-	timestamp: number;
-	lastUpdated: number;
-	verified: boolean;
+	firstName: string;
+	lastName: string;
 	email: string;
-	resume: string;
-	teamCode: string | null;
+	userStatus: string;
+	age: string;
+	phoneNumber: string;
+	country: string;
+	school: string;
+	levelOfStudy: string;
+	graduationMonth: string;
+	graduationYear: string;
+	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
+	dietRestrictions: string[];
+	hackathonCount: string;
+	resume: string | null;
+	linkedin?: string;
+	github?: string;
+	otherSites: string[];
+	attendingPrehacks: boolean;
+	lookingForTeam: boolean;
+	codeOfConductAgreement: boolean;
+	dataAgreement: boolean;
+	mlhAgreement: boolean;
 }
 
 function makeIcon(checked: boolean): CheckboxProps['icon'] {
@@ -66,32 +50,50 @@ const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
 						<Checkbox
 							readOnly
 							checked
-							icon={makeIcon(applicant.status.completedProfile)}
-							color={applicant.status.completedProfile ? 'green' : 'red'}
+							icon={makeIcon(applicant.userStatus !== 'Profile Pending')}
+							color={applicant.userStatus !== 'Profile Pending' ? 'green' : 'red'}
 						/>
 						<Text>Profile Completed</Text>
 					</Group>
-					{!applicant.status.completedProfile && (
+					{applicant.userStatus === 'Profile Pending' && (
 						<Text weight="bold">
 							Complete your application in the <Link href="/application">application tab</Link>
 						</Text>
 					)}
 				</Group>
 				<Group>
-					<Checkbox readOnly checked icon={makeIcon(applicant.status.admitted)} color={applicant.status.admitted ? 'green' : 'red'} />
+					<Checkbox
+						readOnly
+						checked
+						icon={makeIcon(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending')}
+						color={applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending' ? 'green' : 'red'}
+					/>
 					<Text>Admitted</Text>
 				</Group>
 				<Group maw="40%" sx={{ justifyContent: 'space-between' }}>
 					<Group>
-						<Checkbox readOnly checked icon={makeIcon(applicant.status.confirmed)} color={applicant.status.confirmed ? 'green' : 'red'} />
+						<Checkbox
+							readOnly
+							checked
+							icon={makeIcon(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In')}
+							color={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+						/>
 						<Text>Confirmed</Text>
 					</Group>
-					{applicant.status.admitted && !applicant.status.confirmed && (
-						<Text weight="bold">Confirmation Deadline: {new Date(applicant.status.confirmBy).toLocaleDateString()}</Text>
+					{applicant.userStatus === 'Confirmation Pending' && (
+						<Group>
+							<Button>I will attend.</Button>
+							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
+						</Group>
 					)}
 				</Group>
 				<Group>
-					<Checkbox readOnly checked icon={makeIcon(applicant.status.checkedIn)} color={applicant.status.checkedIn ? 'green' : 'red'} />
+					<Checkbox
+						readOnly
+						checked
+						icon={makeIcon(applicant.userStatus === 'Checked In')}
+						color={applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+					/>
 					<Text>Checked In</Text>
 				</Group>
 			</Stack>
@@ -106,45 +108,29 @@ const Dashboard: NextPage = () => {
 	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
 	const smol = useMediaQuery('screen and (max-width: 1000px)');
 	const [applicant, setApplicant] = useState<Applicant>({
-		profile: {
-			adult: true,
-			codeAgreement: true,
-			dataAgreement: true,
-			name: 'Christopher Gu',
-			phone: '6366750378',
-			school: 'Missouri University of Science and Technology',
-			graduationYear: '2020',
-			major: 'Computer Science',
-			participationCount: 'L',
-			diet: 'N',
-			resume: true,
-			travel: 'F',
-			attendingPrehacks: true
-		},
-		confirmation: {
-			dietaryRestrictions: [] as string[],
-			signaturePhotoRelease: 'Alan',
-			dateSig: '01/31/2020'
-		},
-		status: {
-			completedProfile: true,
-			admitted: true,
-			confirmed: false,
-			declined: false,
-			checkedIn: false,
-			reimbursementGiven: false,
-			admittedBy: 'msthackathon@umsystem.edu',
-			confirmBy: 1.58286954e12,
-			rejected: false,
-			checkInTime: 1.580878859514e12
-		},
-		admin: true,
-		timestamp: 1.570421527505e12,
-		lastUpdated: 1.580751936035e12,
-		verified: true,
+		userStatus: 'Profile Pending',
+		firstName: 'Christopher',
+		lastName: 'Gu',
+		phoneNumber: '6366750378',
+		graduationYear: '2020',
+		graduationMonth: 'May',
 		email: 'msthackathon@umsystem.edu',
-		resume: '',
-		teamCode: null
+		school: 'Missouri University of Science and Technology',
+		country: 'United States',
+		age: '21',
+		attendingPrehacks: true,
+		resume: null,
+		dietRestrictions: [],
+		hackathonCount: 'L',
+		levelOfStudy: 'College',
+		codeOfConductAgreement: true,
+		dataAgreement: true,
+		mlhAgreement: true,
+		lookingForTeam: true,
+		otherSites: [],
+		shirtSize: 'M',
+		github: '',
+		linkedin: ''
 	});
 
 	useEffect(() => {
@@ -167,7 +153,9 @@ const Dashboard: NextPage = () => {
 
 	return (
 		<div>
-			<Title>Welcome, {applicant.profile.name}</Title>
+			<Title>
+				Welcome, {applicant.firstName} {applicant.lastName}
+			</Title>
 			<Status applicant={applicant} />
 			<Space h="lg" />
 			<Title order={2}>Team Status</Title>
@@ -176,8 +164,8 @@ const Dashboard: NextPage = () => {
 				{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
 			</Group>
 			<Space h="lg" />
-			{applicant.profile.attendingPrehacks && <Title order={4}>Prehacks Date: April 5-8</Title>}
-			<Title order={4}>Hackathon Date: April 9-11</Title>
+			{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
+			<Title order={4}>Hackathon Date: April 14-16th</Title>
 			{!smol ? (
 				<Group spacing={4} align="end">
 					<Title mb={16} mr={16}>
