@@ -1,23 +1,10 @@
-import {
-	Box,
-	Button,
-	Checkbox,
-	FileInput,
-	Group,
-	MultiSelect,
-	NativeSelect,
-	NumberInput,
-	SelectItem,
-	Stack,
-	Stepper,
-	Switch,
-	Text,
-	TextInput
-} from '@mantine/core';
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
+import { Box, Button, Checkbox, FileInput, Group, MultiSelect, NativeSelect, NumberInput, Stack, Stepper, Switch, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface FormValues {
 	firstName: string;
@@ -243,47 +230,17 @@ const countries = [
 	'Zimbabwe'
 ];
 
-const levelsOfStudy: SelectItem[] = [
-	{
-		label: 'Less than Secondary/High School',
-		value: '<HS'
-	},
-	{
-		label: 'Secondary/High School',
-		value: 'HS'
-	},
-	{
-		label: 'Undergraduate University (2 year - community college or similar)',
-		value: 'UCC'
-	},
-	{
-		label: 'Undergraduate University (3+ year)',
-		value: 'UUG'
-	},
-	{
-		label: 'Graduate University (Masters, Professional, Doctoral, etc.)',
-		value: 'UG'
-	},
-	{
-		label: 'Code School/Bootcamp',
-		value: 'CSB'
-	},
-	{
-		label: 'Other Vocational/Trade Program/Apprenticeship',
-		value: 'VTPA'
-	},
-	{
-		label: 'Other',
-		value: 'O'
-	},
-	{
-		label: "I'm currently not a student",
-		value: 'NS'
-	},
-	{
-		label: 'Prefer not to answer',
-		value: 'NA'
-	}
+const levelsOfStudy: string[] = [
+	'Less than Secondary/High School',
+	'Secondary/High School',
+	'Undergraduate University (2 year - community college or similar)',
+	'Undergraduate University (3+ year)',
+	'Graduate University (Masters, Professional, Doctoral, etc.)',
+	'Code School/Bootcamp',
+	'Other Vocational/Trade Program/Apprenticeship',
+	'Other',
+	"I'm currently not a student",
+	'Prefer not to answer'
 ];
 
 const Application: NextPage = () => {
@@ -294,13 +251,13 @@ const Application: NextPage = () => {
 			email: '',
 			age: '18',
 			phoneNumber: '',
-			country: 'USA',
+			country: 'United States',
 			school: '',
-			levelOfStudy: 'University',
+			levelOfStudy: 'Undergraduate University (3+ year)',
 			graduationYear: new Date().getFullYear(),
-			graduationMonth: '',
+			graduationMonth: 'May',
 			shirtSize: 'M',
-			hackathonCount: 'N',
+			hackathonCount: 'My first hackathon!',
 			resume: null,
 			linkedin: '',
 			github: '',
@@ -316,7 +273,10 @@ const Application: NextPage = () => {
 			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must in format xxxyyyzzzz'),
+			age: (value) => (/^\d{1,2}$/.test(value) ? null : 'Invalid age'),
+			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
+			graduationYear: (value) => (/^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
+			graduationMonth: (value) => (value === '' ? 'Please select a graduation month' : null),
 			school: (value) => (value === '' ? 'Please enter your school' : null),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
@@ -324,27 +284,64 @@ const Application: NextPage = () => {
 		}
 	});
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
-	const [dietOptions, setDietOptions] = useState<SelectItem[]>([
-		{ value: 'T', label: 'Vegetarian' },
-		{ value: 'V', label: 'Vegan' },
-		{ value: 'G', label: 'Gluten Free' },
-		{ value: 'A', label: 'Nut Allergy' },
-		{ value: 'K', label: 'Kosher' },
-		{ value: 'H', label: 'Halal' }
-	]);
+	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
-	const { user, isLoading } = useUser();
-
-	useEffect(() => {
-		if (!isLoading) {
-			console.log(user);
-		}
-	}, [user, isLoading]);
+	const { user } = useUser();
+	const [submitted, setSubmitted] = useState<boolean>(false);
+	const router = useRouter();
 
 	return (
 		<div>
 			<Box sx={{ maxWidth: 1200 }} mx="auto">
-				<form onSubmit={form.onSubmit((values) => console.log(values))}>
+				<form
+					onSubmit={form.onSubmit((values) => {
+						if (!user) {
+							throw new Error('Shit has gone terribly wrong...');
+						}
+
+						if (form.values.resume) {
+							const reader = new FileReader();
+
+							reader.onloadend = () => {
+								const applicationData = {
+									...values,
+									graduationYear: values.graduationYear.toString(),
+									resume: reader.result
+								};
+
+								axios
+									.post('/api/users', applicationData)
+									.then(() => {
+										router.replace('/dashboard');
+									})
+									.catch((err: AxiosError) => {
+										if (err.response) {
+											console.log(err.response.data);
+										}
+									});
+							};
+
+							reader.readAsText(form.values.resume, 'base64');
+						} else {
+							const applicationData = {
+								...values,
+								graduationYear: values.graduationYear.toString()
+							};
+
+							axios
+								.post('/api/users', applicationData)
+								.then(() => {
+									router.replace('/dashboard');
+								})
+								.catch((err: AxiosError) => {
+									if (err.response) {
+										console.log(err.response.data);
+									}
+								});
+						}
+
+						setSubmitted(true);
+					})}>
 					<Stepper
 						active={step}
 						onStepClick={(step: number) => {
@@ -438,20 +435,14 @@ const Application: NextPage = () => {
 										creatable
 										getCreateLabel={(query) => query}
 										onCreate={(query) => {
-											const item = { value: query, label: query };
-											setDietOptions([...dietOptions, { value: query, label: query }]);
-											return item;
+											setDietOptions([...dietOptions, query]);
+											return query;
 										}}
 									/>
 									<NativeSelect
 										label="How many hackathons have you participated in?"
 										{...form.getInputProps('hackathonCount')}
-										data={[
-											{ value: 'N', label: 'My first hackathon!' },
-											{ value: 'S', label: '1-3' },
-											{ value: 'M', label: '4-6' },
-											{ value: 'L', label: '7+' }
-										]}
+										data={['My first hackathon!', '1-3', '4-6', '7+']}
 									/>
 									{/* TODO: FileInput has a Capture prop has type boolean | "user" | "environment"
 										Add after we know hosting server and resume site api */}
@@ -547,12 +538,15 @@ const Application: NextPage = () => {
 									<Group position="right" mt="md">
 										<Button
 											variant="default"
+											disabled={submitted}
 											onClick={() => {
 												setStep(step - 1);
 											}}>
 											Back
 										</Button>
-										<Button type="submit">Submit</Button>
+										<Button type="submit" loading={submitted}>
+											Submit
+										</Button>
 									</Group>
 								</Stack>
 							</Box>
