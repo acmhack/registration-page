@@ -303,10 +303,13 @@ const Application: NextPage = () => {
 							const reader = new FileReader();
 
 							reader.onloadend = () => {
+								const resultString = reader.result as string;
+								const resume = resultString.slice(resultString.indexOf(',') + 1);
+
 								const applicationData = {
 									...values,
 									graduationYear: values.graduationYear.toString(),
-									resume: reader.result
+									resume
 								};
 
 								axios
@@ -321,7 +324,7 @@ const Application: NextPage = () => {
 									});
 							};
 
-							reader.readAsText(form.values.resume, 'base64');
+							reader.readAsDataURL(form.values.resume);
 						} else {
 							const applicationData = {
 								...values,
