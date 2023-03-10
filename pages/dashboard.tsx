@@ -82,7 +82,7 @@ const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
 					</Group>
 					{applicant.userStatus === 'Confirmation Pending' && (
 						<Group>
-							<Button>I will attend.</Button>
+							<Button compact>I will attend!</Button>
 							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
 						</Group>
 					)}
@@ -165,7 +165,7 @@ const Dashboard: NextPage = () => {
 			</Group>
 			<Space h="lg" />
 			{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
-			<Title order={4}>Hackathon Date: April 14-16th</Title>
+			<Title order={4}>Hackathon Date: April 14th-16th</Title>
 			{!smol ? (
 				<Group spacing={4} align="end">
 					<Title mb={16} mr={16}>
