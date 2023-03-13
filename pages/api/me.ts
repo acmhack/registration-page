@@ -1,6 +1,7 @@
 import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { dbUserToApplicant } from '../../utils/utils';
 
 export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
 	const session = await getSession(req, res);
@@ -37,9 +38,9 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 		await axios.put(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`, newUser);
 
-		return res.status(200).json(newUser);
+		return res.status(200).json(dbUserToApplicant(newUser));
 	}
 
-	res.status(200).json(response.data);
+	res.status(200).json(dbUserToApplicant(response.data));
 });
 
