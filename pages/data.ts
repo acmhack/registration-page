@@ -30,11 +30,23 @@ export type User = {
     mlhcommunication: boolean
 }
 
-export function getApplicationsAsync() {
-    return axios.get(endpoint + `items`, {
+export function getApplications() {
+    return axios.get('/api/users', {
         responseType: "json",
     }).then((response) => {
         return response.data;
+    }).catch((err) => {
+        console.log(err);
     })
+}
+
+export async function updateStatus(id: string, userStatus: UserStatus) {
+	console.log("We're here")
+	const resp = await axios.get(endpoint + `items${id}`, {
+			responseType: "json",
+		});
+	const currentData : User = resp.data;
+	currentData.userstatus = userStatus;
+	axios.put(endpoint + `items` , currentData)
 }
 
