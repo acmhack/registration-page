@@ -1,20 +1,21 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
-import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space } from '@mantine/core';
+import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
 
 const NAV_LINK_STYLE: CSSObject = {
-	borderTop: '2px solid rgba(210, 80, 110, 0.5)',
+	// borderTop: '2px solid rgba(210, 80, 110, 0.5)',
+	borderTop: '2px solid rgba(43, 165, 104, 0.5)',
 	cursor: 'pointer',
 	position: 'relative',
 
 	'&:hover': {
-		background: 'rgba(255, 102, 134, 0.7)'
+		background: 'rgba(23, 145, 84, 0.7)'
 	},
 
 	'&:last-child': {
-		borderBottom: '2px solid rgba(210, 80, 110, 0.5)'
+		borderBottom: '2px solid rgba(43, 165, 104, 0.5)'
 	},
 
 	'&.active:before': {
@@ -23,7 +24,7 @@ const NAV_LINK_STYLE: CSSObject = {
 		top: 0,
 		left: 0,
 		height: '100%',
-		borderLeft: '8px solid #FF7090'
+		borderLeft: '8px solid #00673a'
 	},
 
 	'& a': {
@@ -48,11 +49,24 @@ export default function App(props: AppProps) {
 				withGlobalStyles
 				withNormalizeCSS
 				theme={{
-					colorScheme: 'light'
+					colorScheme: 'light',
+					colors: {
+						green: [
+							...(new Array(10).fill(null).map(
+								() =>
+									'#' +
+									[23, 155, 94]
+										.map((val) => val.toString(16))
+										.map((hex) => (hex.length < 2 ? '0' + hex : hex))
+										.join('')
+							) as Tuple<string, 10>)
+						]
+					},
+					primaryColor: 'green'
 				}}>
 				<AppShell
 					navbar={
-						<Navbar width={{ base: 300 }} bg="#E96281" style={{ color: 'white' }}>
+						<Navbar width={{ base: 300 }} bg="#0d874a" style={{ color: 'white' }}>
 							<Link href="/">
 								<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
 							</Link>
