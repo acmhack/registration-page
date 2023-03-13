@@ -49,7 +49,8 @@ export default function App(props: AppProps) {
 				withGlobalStyles
 				withNormalizeCSS
 				theme={{
-					colorScheme: 'light'
+					colorScheme: 'light',
+					loader: 'oval'
 				}}>
 				<ModalsProvider>
 				<AppShell
