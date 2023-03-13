@@ -9,25 +9,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 import axios from 'axios';
 
-import { User, UserStatus, getApplicationsAsync } from './data';
-
-const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/'
-
-// debugging
-// const applications = getApplicationsAsync()
-// applications.then(data => {
-// 		console.log(data);
-// }, console.error)
-
-const updateStatus = async (id: string, userStatus: UserStatus) => {
-	console.log("We're here")
-	const resp = await axios.get(endpoint + `items${id}`, {
-			responseType: "json",
-		});
-	const currentData : User = resp.data;
-	currentData.userstatus = userStatus;
-	axios.put(endpoint + `items` , currentData)
-}
+import { User, getApplications, updateStatus } from './data';
 
 const Admin: NextPage = () => {
 	const { user, isLoading } = useUser();
@@ -40,6 +22,7 @@ const Admin: NextPage = () => {
 	
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
 	const [records, setRecords] = useState<User[]>([])
+	const [fetching, setFetching] = useState(false)
 
 	useEffect(() => {
 		const data = sortBy(records, sortStatus.columnAccessor);
@@ -47,7 +30,9 @@ const Admin: NextPage = () => {
 	}, [sortStatus]);
 
 	useEffect(() => { //jank one time run
-		getApplicationsAsync().then(setRecords);
+		setFetching(true)
+		getApplications().then(setRecords);
+		setFetching(false)
 	}, []);
 
 	return (
@@ -63,6 +48,7 @@ const Admin: NextPage = () => {
 					{ accessor: 'userstatus', width: '20%', sortable: true },
 				]}
 				records={records}
+				fetching={fetching}
 				sortStatus={sortStatus}
 				onSortStatusChange={setSortStatus}
 				onRowClick={(user, rowIndex) => {
