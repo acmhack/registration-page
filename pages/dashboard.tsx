@@ -2,7 +2,7 @@ import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
@@ -41,12 +41,12 @@ function makeIcon(checked: boolean): CheckboxProps['icon'] {
 	return CheckboxIcon;
 }
 
-const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
+const Status: FC<{ applicant: Applicant; onConfirm: () => void; confirming: boolean }> = ({ applicant, onConfirm, confirming }) => {
 	return (
 		<Stack spacing={6}>
 			<Title order={2}>Your Pre-Hackathon Checklist:</Title>
 			<Stack spacing={6} ml="lg">
-				<Group maw="40%" sx={{ justifyContent: 'space-between' }}>
+				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
 					<Group>
 						<Checkbox
 							readOnly
@@ -71,7 +71,7 @@ const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
 					/>
 					<Text>Admitted</Text>
 				</Group>
-				<Group maw="40%" sx={{ justifyContent: 'space-between' }}>
+				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
 					<Group>
 						<Checkbox
 							readOnly
@@ -83,7 +83,9 @@ const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
 					</Group>
 					{applicant.userStatus === 'Confirmation Pending' && (
 						<Group>
-							<Button compact>I will attend!</Button>
+							<Button compact loading={confirming} onClick={onConfirm}>
+								I will attend!
+							</Button>
 							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
 						</Group>
 					)}
@@ -109,6 +111,7 @@ const Dashboard: NextPage = () => {
 	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
 	const smol = useMediaQuery('screen and (max-width: 1000px)');
 	const [applicant, setApplicant] = useState<Applicant | null>(null);
+	const [confirming, setConfirming] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (!user && !isLoading) {
@@ -143,7 +146,27 @@ const Dashboard: NextPage = () => {
 			<Title>
 				Welcome, {applicant.firstName} {applicant.lastName}
 			</Title>
-			<Status applicant={applicant} />
+			<Status
+				applicant={applicant}
+				onConfirm={() => {
+					axios
+						.post('/api/confirm')
+						.then((res) => {
+							setConfirming(false);
+							setApplicant(res.data);
+						})
+						.catch((err: AxiosError) => {
+							if (err.response) {
+								console.log(err.response);
+							}
+
+							setConfirming(false);
+						});
+
+					setConfirming(true);
+				}}
+				confirming={confirming}
+			/>
 			<Space h="lg" />
 			<Title order={2}>Team Status</Title>
 			<Group>
