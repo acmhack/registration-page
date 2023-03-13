@@ -1,12 +1,137 @@
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import { Title } from '@mantine/core';
+import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { calculateRemainingTime } from '../utils/utils';
+
+interface Applicant {
+	firstName: string;
+	lastName: string;
+	email: string;
+	userStatus: string;
+	age: string;
+	phoneNumber: string;
+	country: string;
+	school: string;
+	levelOfStudy: string;
+	graduationMonth: string;
+	graduationYear: string;
+	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
+	dietRestrictions: string[];
+	hackathonCount: string;
+	resume: string | null;
+	linkedin?: string;
+	github?: string;
+	otherSites: string[];
+	attendingPrehacks: boolean;
+	lookingForTeam: boolean;
+	codeOfConductAgreement: boolean;
+	dataAgreement: boolean;
+	mlhAgreement: boolean;
+}
+
+function makeIcon(checked: boolean): CheckboxProps['icon'] {
+	const CheckboxIcon: CheckboxProps['icon'] = ({ className }) => (checked ? <IconCheck className={className} /> : <IconX className={className} />);
+
+	return CheckboxIcon;
+}
+
+const Status: FC<{ applicant: Applicant }> = ({ applicant }) => {
+	return (
+		<Stack spacing={6}>
+			<Title order={2}>Your Pre-Hackathon Checklist:</Title>
+			<Stack spacing={6} ml="lg">
+				<Group maw="40%" sx={{ justifyContent: 'space-between' }}>
+					<Group>
+						<Checkbox
+							readOnly
+							checked
+							icon={makeIcon(applicant.userStatus !== 'Profile Pending')}
+							color={applicant.userStatus !== 'Profile Pending' ? 'green' : 'red'}
+						/>
+						<Text>Profile Completed</Text>
+					</Group>
+					{applicant.userStatus === 'Profile Pending' && (
+						<Text weight="bold">
+							Complete your application in the <Link href="/application">application tab</Link>
+						</Text>
+					)}
+				</Group>
+				<Group>
+					<Checkbox
+						readOnly
+						checked
+						icon={makeIcon(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending')}
+						color={applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending' ? 'green' : 'red'}
+					/>
+					<Text>Admitted</Text>
+				</Group>
+				<Group maw="40%" sx={{ justifyContent: 'space-between' }}>
+					<Group>
+						<Checkbox
+							readOnly
+							checked
+							icon={makeIcon(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In')}
+							color={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+						/>
+						<Text>Confirmed</Text>
+					</Group>
+					{applicant.userStatus === 'Confirmation Pending' && (
+						<Group>
+							<Button compact>I will attend!</Button>
+							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
+						</Group>
+					)}
+				</Group>
+				<Group>
+					<Checkbox
+						readOnly
+						checked
+						icon={makeIcon(applicant.userStatus === 'Checked In')}
+						color={applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+					/>
+					<Text>Checked In</Text>
+				</Group>
+			</Stack>
+		</Stack>
+	);
+};
 
 const Dashboard: NextPage = () => {
 	const { user, isLoading } = useUser();
 	const router = useRouter();
+	const [lft, setLFT] = useState<boolean>(true);
+	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
+	const smol = useMediaQuery('screen and (max-width: 1000px)');
+	const [applicant, setApplicant] = useState<Applicant>({
+		userStatus: 'Profile Pending',
+		firstName: 'Christopher',
+		lastName: 'Gu',
+		phoneNumber: '6366750378',
+		graduationYear: '2020',
+		graduationMonth: 'May',
+		email: 'msthackathon@umsystem.edu',
+		school: 'Missouri University of Science and Technology',
+		country: 'United States',
+		age: '21',
+		attendingPrehacks: true,
+		resume: null,
+		dietRestrictions: [],
+		hackathonCount: 'L',
+		levelOfStudy: 'College',
+		codeOfConductAgreement: true,
+		dataAgreement: true,
+		mlhAgreement: true,
+		lookingForTeam: true,
+		otherSites: [],
+		shirtSize: 'M',
+		github: '',
+		linkedin: ''
+	});
 
 	useEffect(() => {
 		if (!user && !isLoading) {
@@ -16,10 +141,84 @@ const Dashboard: NextPage = () => {
 		}
 	}, [user, router, isLoading]);
 
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setCountdown(calculateRemainingTime());
+		}, 1000);
+
+		return () => {
+			clearInterval(interval);
+		};
+	}, []);
+
 	return (
 		<div>
-			<Title>Dashboard</Title>
-			<Title order={2}>Subtitle</Title>
+			<Title>
+				Welcome, {applicant.firstName} {applicant.lastName}
+			</Title>
+			<Status applicant={applicant} />
+			<Space h="lg" />
+			<Title order={2}>Team Status</Title>
+			<Group>
+				<Switch onChange={(evt) => setLFT(evt.target.checked)} checked={lft} />
+				{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
+			</Group>
+			<Space h="lg" />
+			{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
+			<Title order={4}>Hackathon Date: April 14th-16th</Title>
+			{!smol ? (
+				<Group spacing={4} align="end">
+					<Title mb={16} mr={16}>
+						T-minus
+					</Title>
+					<Title order={1} size={96}>
+						{days}
+					</Title>
+					<Title order={2} mb={16}>
+						d
+					</Title>
+					<Title order={1} size={48} mb={32} mx={8}>
+						:
+					</Title>
+					<Title order={1} size={96}>
+						{hours < 10 ? '0' + hours : hours}
+					</Title>
+					<Title order={2} mb={16}>
+						h
+					</Title>
+					<Title order={1} size={48} mb={32} mx={8}>
+						:
+					</Title>
+					<Title order={1} size={96}>
+						{minutes < 10 ? '0' + minutes : minutes}
+					</Title>
+					<Title order={2} mb={16}>
+						m
+					</Title>
+					<Title order={1} size={48} mb={32} mx={8}>
+						:
+					</Title>
+					<Title order={1} size={96}>
+						{seconds < 10 ? '0' + seconds : seconds}
+					</Title>
+					<Title order={2} mb={16}>
+						s
+					</Title>
+				</Group>
+			) : (
+				<Group spacing={0} align="end">
+					<Title>T-minus</Title>
+					<Space w={16} />
+					<Title>{days}</Title>
+					<Text size="sm">d</Text>
+					<Title>:{hours}</Title>
+					<Text size="sm">h</Text>
+					<Title>:{minutes}</Title>
+					<Text size="sm">m</Text>
+					<Title>:{seconds}</Title>
+					<Text size="sm">s</Text>
+				</Group>
+			)}
 		</div>
 	);
 };

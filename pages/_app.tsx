@@ -63,9 +63,9 @@ export default function App(props: AppProps) {
 							<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 								<Link href="/application">Application</Link>
 							</Navbar.Section>
-							<Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+							{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 								<Link href="/team">Team</Link>
-							</Navbar.Section>
+							</Navbar.Section> */}
 							<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 								<Link href="/admin">Admin</Link>
 							</Navbar.Section>
