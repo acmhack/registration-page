@@ -7,7 +7,7 @@ import { NextPage } from 'next/types';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 
-import { User, UserStatus, getApplications, updateStatus } from './data';
+import { getApplications, updateStatus } from '../utils/data';
 
 const formatUserStatus = (userstatus : UserStatus) : CSSProperties | undefined => {
 		if (userstatus == "Admission Pending") { // Ready For Review
@@ -64,16 +64,16 @@ const Admin: NextPage = () => {
 	}, [user, isLoading]);
 	
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-	const [records, setRecords] = useState<User[]>([])
-	const [initialRecords, setInitialRecords] = useState<User[]>([])
+	const [records, setRecords] = useState<DBEntry[]>([])
+	const [initialRecords, setInitialRecords] = useState<DBEntry[]>([])
 	const [query, setQuery] = useState('')
 	const [debouncedQuery] = useDebouncedValue(query, 200);
 	const [fetching, setFetching] = useState(false)
-	const [readyForReview, setReadyForReviewOnly] = useState(true)
+	const [readyForReview, setReadyForReviewOnly] = useState(false)
 
 	useEffect(() => {
 		setRecords(
-			initialRecords.filter((user : User) => {
+			initialRecords.filter((user : DBEntry) => {
 				if (readyForReview && user.userstatus != "Admission Pending") {
 					return false;
 				}

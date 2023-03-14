@@ -1,3 +1,5 @@
+type UserStatus = 'Profile Pending' | 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Confirmed' | 'Checked In'
+
 interface JSONFormValues {
 	firstName: string;
 	lastName: string;
@@ -26,7 +28,7 @@ interface JSONFormValues {
 interface DBEntry {
 	id: string;
 	admin: boolean;
-	userstatus: string;
+	userstatus: UserStatus;
 	firstname: string;
 	lastname: string;
 	email: string;
@@ -38,7 +40,7 @@ interface DBEntry {
 	gradyear: string;
 	gradmonth: string;
 	shirtsize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
-	resume: string | null;
+	resume: string | null; //base64
 	diet: string;
 	experience: string;
 	links: string;
@@ -53,7 +55,7 @@ interface Applicant {
 	firstName: string;
 	lastName: string;
 	email: string;
-	userStatus: string;
+	userStatus: UserStatus;
 	age: string;
 	phoneNumber: string;
 	country: string;
