@@ -30,6 +30,7 @@ export type User = {
     mlhcommunication: boolean
 }
 
+/*
 export function getApplications() {
     return axios.get('/api/users', {
         responseType: "json",
@@ -39,14 +40,20 @@ export function getApplications() {
         console.log(err);
     })
 }
+*/
+
+export async function getApplications() {
+    return (await axios.get('/api/users', {
+        responseType: "json",
+    })).data
+}
 
 export async function updateStatus(id: string, newUserStatus: UserStatus) {
 	console.log("We're here")
-	const resp = await axios.get('/api/users' + `items${id}`, {
+	const user : User = (await axios.get('/api/users' + `items${id}`, {
 			responseType: "json",
-		});
-	const currentData : User = resp.data;
-	currentData.userstatus = newUserStatus;
-	axios.put(endpoint + `items` , currentData)
+		})).data;
+	user.userstatus = newUserStatus;
+	axios.put(endpoint + `items` , user)
 }
 

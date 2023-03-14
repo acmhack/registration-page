@@ -69,7 +69,7 @@ const Admin: NextPage = () => {
 	const [query, setQuery] = useState('')
 	const [debouncedQuery] = useDebouncedValue(query, 200);
 	const [fetching, setFetching] = useState(false)
-	const [readyForReview, setReadyForReviewOnly] = useState(false)
+	const [readyForReview, setReadyForReviewOnly] = useState(true)
 
 	useEffect(() => {
 		setRecords(
