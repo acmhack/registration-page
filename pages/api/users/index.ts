@@ -47,7 +47,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			const data: DBEntry = {
 				id,
 				admin: false,
-				userstatus: 'Ready for Review',
+				userstatus: 'Profile Pending',
 				firstname: firstName,
 				lastname: lastName,
 				email,
