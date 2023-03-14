@@ -9,7 +9,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 	switch (req.method) {
 		case 'POST': {
-			const data = (await axios.get<DBEntry>(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`)).data;
+			const data = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
 
 			if (data.userstatus !== 'Confirmation Pending') {
 				return res.status(400).send('User is not pending confirmation or already confirmed');
@@ -20,7 +20,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 				userstatus: 'Confirmed'
 			};
 
-			await axios.put('https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items', newUser);
+			await axios.put(process.env.API_URL!, newUser);
 
 			return res.status(200).json(dbUserToApplicant(newUser));
 		}

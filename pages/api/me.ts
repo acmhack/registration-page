@@ -7,7 +7,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 	const session = await getSession(req, res);
 	const id = session!.user.sub;
 
-	const response = await axios.get(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`);
+	const response = await axios.get(`${process.env.API_URL}/${id}`);
 
 	if (response.data === '') {
 		const newUser: DBEntry = {
@@ -36,7 +36,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			mlhlogistics: false
 		};
 
-		await axios.put(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`, newUser);
+		await axios.put(`${process.env.API_URL}/${id}`, newUser);
 
 		return res.status(200).json(dbUserToApplicant(newUser));
 	}
