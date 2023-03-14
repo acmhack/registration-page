@@ -95,11 +95,16 @@ const Admin: NextPage = () => {
 		setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
 	}, [sortStatus]);
 
-	useEffect(() => {
-		setFetching(true)
-		getApplications().then(setInitialRecords); //TODO: Update table when setRecords
-		getApplications().then(setRecords) //setRecords(initialRecords)
+	const load = async () => {
+		setFetching(true);
+		const data = await getApplications();
+		setInitialRecords(data)
+		setRecords(data)
 		setFetching(false)
+	}
+
+	useEffect(() => {
+		load()
 	}, []);
 
 	return (
