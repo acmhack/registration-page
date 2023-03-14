@@ -8,10 +8,10 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 	switch (req.method) {
 		case 'GET': {
-			const user = (await axios.get<DBEntry>(`https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items/${id}`)).data;
+			const user = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
 
 			if (user.admin) {
-				const response = await axios.get('https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items');
+				const response = await axios.get(process.env.API_URL!);
 
 				return res.status(200).json(response.data);
 			} else {
@@ -70,7 +70,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 				mlhlogistics: mlhAgreement
 			};
 
-			const response = await axios.put('https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/items', data);
+			const response = await axios.put(process.env.API_URL!, data);
 
 			return res.status(200).json(response.data);
 		}
