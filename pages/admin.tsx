@@ -54,18 +54,6 @@ const formatUserStatus = (userstatus : UserStatus) : CSSProperties | undefined =
 		}
 }
 
-// TODO: query only upon access to the page
-const getAllApplications = async () => {
-	try {
-		const res = await fetch(endpoint + `items`);
-		const data = await res.json();
-		console.log(data)
-	}
-	catch (err) {
-		console.log(err)
-	}
-};
-
 const Admin: NextPage = () => {
 	const { user, isLoading } = useUser();
 
