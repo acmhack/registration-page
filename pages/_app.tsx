@@ -1,4 +1,5 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
+import { ModalsProvider } from '@mantine/modals';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -50,6 +51,7 @@ export default function App(props: AppProps) {
 				withNormalizeCSS
 				theme={{
 					colorScheme: 'light',
+					loader: 'oval',
 					colors: {
 						green: [
 							...(new Array(10).fill(null).map(
@@ -64,6 +66,7 @@ export default function App(props: AppProps) {
 					},
 					primaryColor: 'green'
 				}}>
+				<ModalsProvider>
 				<AppShell
 					navbar={
 						<Navbar width={{ base: 300 }} bg="#0d874a" style={{ color: 'white' }}>
@@ -92,6 +95,7 @@ export default function App(props: AppProps) {
 						<Component {...pageProps} />
 					</UserProvider>
 				</AppShell>
+				</ModalsProvider>
 			</MantineProvider>
 		</>
 	);
