@@ -9,24 +9,22 @@ import sortBy from 'lodash/sortBy';
 
 import { User, UserStatus, getApplications, updateStatus } from './data';
 
-let initialRecords : User[];
-
 const formatUserStatus = (userstatus : UserStatus) : CSSProperties | undefined => {
-		if (userstatus == "Ready for Review") {
+		if (userstatus == "Admission Pending") { // Ready For Review
 			return {
 				fontWeight: 'bold',
 				color: 'blue',
 				background: '##FF332222',
 			}
 		}
-		else if (userstatus == "In Progress") {
+		else if (userstatus == "Profile Pending") { // In Progress
 			return {
 				fontWeight: 'bold',
 				color: 'purple',
 				background: '##FF332222',
 			}
 		}
-		else if (userstatus == "Admitted") {
+		else if (userstatus == "Confirmation Pending") { // Admitted
 			return {
 				fontWeight: 'bold',
 				color: 'green',
@@ -37,6 +35,18 @@ const formatUserStatus = (userstatus : UserStatus) : CSSProperties | undefined =
 			return {
 				fontWeight: 'bold',
 				color: 'red',
+				background: '##FF332222',
+			}
+		} else if (userstatus == "Confirmed") {
+			return {
+				fontWeight: 'bold',
+				color: 'gold',
+				background: '##FF332222',
+			}
+		} else if (userstatus == "Checked In") {
+			return {
+				fontWeight: 'bold',
+				color: 'purple',
 				background: '##FF332222',
 			}
 		} else {
@@ -70,13 +80,13 @@ const Admin: NextPage = () => {
 	const [initialRecords, setInitialRecords] = useState<User[]>([])
 	const [query, setQuery] = useState('')
 	const [debouncedQuery] = useDebouncedValue(query, 200);
-	const [fetching, setFetching] = useState(true)
+	const [fetching, setFetching] = useState(false)
 	const [readyForReview, setReadyForReviewOnly] = useState(false)
 
 	useEffect(() => {
 		setRecords(
 			initialRecords.filter((user : User) => {
-				if (readyForReview && user.userstatus != "Ready for Review") {
+				if (readyForReview && user.userstatus != "Admission Pending") {
 					return false;
 				}
 				if (
@@ -159,7 +169,7 @@ const Admin: NextPage = () => {
 										<Grid.Col span={8}>{user.experience}</Grid.Col>
 									</Grid>
 										<Group position="center">
-											<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${user.id}`, 'Admitted')}>
+											<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${user.id}`, 'Confirmation Pending')}>
 												Admit
 											</Button>
 											<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus( `${user.id}`, 'Denied')}>

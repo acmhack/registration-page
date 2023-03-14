@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/development/';
 
-export type UserStatus = 'In Progress' | 'Ready for Review' | 'Admitted' | 'Denied'
+export type UserStatus = 'Profile Pending' | 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Confirmed' | 'Checked In'
 
 export type User = {
     id: number
@@ -40,13 +40,13 @@ export function getApplications() {
     })
 }
 
-export async function updateStatus(id: string, userStatus: UserStatus) {
+export async function updateStatus(id: string, newUserStatus: UserStatus) {
 	console.log("We're here")
-	const resp = await axios.get(endpoint + `items${id}`, {
+	const resp = await axios.get('/api/users' + `items${id}`, {
 			responseType: "json",
 		});
 	const currentData : User = resp.data;
-	currentData.userstatus = userStatus;
+	currentData.userstatus = newUserStatus;
 	axios.put(endpoint + `items` , currentData)
 }
 
