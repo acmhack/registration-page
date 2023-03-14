@@ -9,7 +9,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 	const response = await axios.get(`${process.env.API_URL}/${id}`);
 
-	if (response.data === '') {
+	if (response.headers['Content-Length'] === 0) {
 		const newUser: DBEntry = {
 			id,
 			admin: false,
@@ -28,7 +28,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			resume: null,
 			diet: '[]',
 			experience: 'My first hackathon!',
-			links: "['', '']",
+			links: '["", ""]',
 			prehacks: false,
 			lft: false,
 			mlhcodeofconduct: false,

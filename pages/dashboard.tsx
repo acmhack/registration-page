@@ -133,6 +133,17 @@ const Dashboard: NextPage = () => {
 		};
 	}, []);
 
+	useEffect(() => {
+		axios
+			.get('/api/users')
+			.then((res) => {
+				console.log(res.data);
+			})
+			.catch((err: AxiosError) => {
+				console.log(err.response);
+			});
+	}, []);
+
 	if (!applicant) {
 		return (
 			<div>
