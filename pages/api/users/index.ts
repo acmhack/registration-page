@@ -1,5 +1,5 @@
 import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
@@ -70,9 +70,32 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 				mlhlogistics: mlhAgreement
 			};
 
-			const response = await axios.put(process.env.API_URL!, data);
+			try {
+				const response = await axios.put(process.env.API_URL!, data);
 
-			return res.status(200).json(response.data);
+				return res.status(200).json(response.data);
+			} catch (err: unknown) {
+				if (isAxiosError(err)) {
+					if (err.response) {
+						if (
+							err.status === 400 &&
+							typeof err.response.data === 'string' &&
+							err.response.data.includes('throughput for the table was exceeded')
+						) {
+							return res.status(502).send("DB is overloaded at the moment, please try again in a bit (don't close the tab).");
+						} else {
+							console.log(err.response);
+						}
+					} else {
+						console.log(err);
+					}
+
+					return res.status(500).send('An unknown error occured');
+				} else {
+					console.log(err);
+					return res.status(500).send('An unknown error occured');
+				}
+			}
 		}
 	}
 });
