@@ -5,13 +5,13 @@ const endpoint = 'https://nfn8sjemsh.execute-api.us-east-2.amazonaws.com/develop
 export type UserStatus = 'Profile Pending' | 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Confirmed' | 'Checked In'
 
 export type User = {
-    id: number
+    id: String
     admin: boolean
     userstatus: UserStatus
     firstname: String
     lastname: String
     email: String
-    age: number
+    age: String
     country: String
     phone: String
     school: String
@@ -50,10 +50,11 @@ export async function getApplications() {
 
 export async function updateStatus(id: string, newUserStatus: UserStatus) {
 	console.log("We're here")
-	const user : User = (await axios.get('/api/users' + `items${id}`, {
+	const user : User = (await axios.get(`/api/users/${id}`, {
 			responseType: "json",
 		})).data;
 	user.userstatus = newUserStatus;
-	axios.put(endpoint + `items` , user)
+	const response = await axios.post(`/api/users/${id}` , user);
+    return response.status;
 }
 

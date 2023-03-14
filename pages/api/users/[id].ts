@@ -18,6 +18,17 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
 			}
 		}
+		case 'POST': {
+			const user = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
+			const data : DBEntry = req.body;
+			
+			if (user.admin && data.id == req.query.id) {
+				const response = await axios.put(process.env.API_URL!, data);
+				return res.status(200).json(response.data);
+			} else {
+				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
+			}
+		}
 		default:
 			res.status(405).json('Invalid Method; use GET');
 	}
