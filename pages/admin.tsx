@@ -179,7 +179,6 @@ const Admin: NextPage = () => {
 						modals.open({
 							modalId: 'applicant-information-modal',
 							title: 'Applicant Information',
-							 
 							styles: {
 								root: { maxWidth: 500 }
 							},
