@@ -1,6 +1,7 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
-import { ModalsProvider } from '@mantine/modals';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
+import { Notifications } from '@mantine/notifications';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -66,35 +67,36 @@ export default function App(props: AppProps) {
 					},
 					primaryColor: 'green'
 				}}>
+				<Notifications position="top-right" />
 				<ModalsProvider>
-				<AppShell
-					navbar={
-						<Navbar width={{ base: 300 }} bg="#0d874a" style={{ color: 'white' }}>
-							<Link href="/">
-								<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
-							</Link>
-							<Space h={50} />
-							<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								<Link href="/dashboard">Dashboard</Link>
-							</Navbar.Section>
-							<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								<Link href="/application">Application</Link>
-							</Navbar.Section>
-							{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+					<AppShell
+						navbar={
+							<Navbar width={{ base: 300 }} bg="#0d874a" style={{ color: 'white' }}>
+								<Link href="/">
+									<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
+								</Link>
+								<Space h={50} />
+								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+									<Link href="/dashboard">Dashboard</Link>
+								</Navbar.Section>
+								<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+									<Link href="/application">Application</Link>
+								</Navbar.Section>
+								{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 								<Link href="/team">Team</Link>
 							</Navbar.Section> */}
-							<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								<Link href="/admin">Admin</Link>
-							</Navbar.Section>
-							<Navbar.Section sx={NAV_LINK_STYLE}>
-								<a href="/api/auth/logout">Logout</a>
-							</Navbar.Section>
-						</Navbar>
-					}>
-					<UserProvider>
-						<Component {...pageProps} />
-					</UserProvider>
-				</AppShell>
+								<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+									<Link href="/admin">Admin</Link>
+								</Navbar.Section>
+								<Navbar.Section sx={NAV_LINK_STYLE}>
+									<a href="/api/auth/logout">Logout</a>
+								</Navbar.Section>
+							</Navbar>
+						}>
+						<UserProvider>
+							<Component {...pageProps} />
+						</UserProvider>
+					</AppShell>
 				</ModalsProvider>
 			</MantineProvider>
 		</>
