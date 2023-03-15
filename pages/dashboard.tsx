@@ -1,6 +1,7 @@
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
@@ -13,7 +14,7 @@ interface Applicant {
 	firstName: string;
 	lastName: string;
 	email: string;
-	userStatus: string;
+	userStatus: UserStatus;
 	age: string;
 	phoneNumber: string;
 	country: string;
@@ -133,21 +134,18 @@ const Dashboard: NextPage = () => {
 		};
 	}, []);
 
-	useEffect(() => {
-		axios
-			.get('/api/users')
-			.then((res) => {
-				console.log(res.data);
-			})
-			.catch((err: AxiosError) => {
-				console.log(err.response);
-			});
-	}, []);
-
 	if (!applicant) {
 		return (
 			<div>
 				<Title>Loading...</Title>
+			</div>
+		);
+	}
+
+	if (applicant.userStatus === 'Denied') {
+		return (
+			<div>
+				<Title color="red">Sorry, your application has been denied.</Title>
 			</div>
 		);
 	}
@@ -169,6 +167,7 @@ const Dashboard: NextPage = () => {
 						.catch((err: AxiosError) => {
 							if (err.response) {
 								console.log(err.response);
+								notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
 							}
 
 							setConfirming(false);
