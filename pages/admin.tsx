@@ -142,8 +142,8 @@ const Admin: NextPage = () => {
 		getApplications().then((records) => {
 			setInitialRecords(records);
 			setRecords(records);
+			setFetching(false);
 		}); //TODO: Update table when setRecords
-		setFetching(false);
 	}, []);
 
 	return (
