@@ -7,7 +7,7 @@ import { NextPage } from 'next/types';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 
-import { showNotification, updateNotification } from '@mantine/notifications';
+import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 
 import { getApplications, updateStatus } from '../utils/data';
@@ -109,7 +109,7 @@ const Admin: NextPage = () => {
 
 	const updatePretty = async (id: string, userstatus : UserStatus, entry : DBEntry) => {
 		closeAllModals();
-		showNotification({
+		notifications.show({
 			id: id,
 			loading: true,
 			title: 'Update processing',
@@ -118,7 +118,7 @@ const Admin: NextPage = () => {
 		});
 		const requestStatus = await updateStatus(id, userstatus);
 		if (requestStatus == 200) {
-			updateNotification({
+			notifications.update({
 				id: id,
 				color: 'teal',
 				title: 'Update successful',
@@ -130,7 +130,7 @@ const Admin: NextPage = () => {
 			entry.userstatus = userstatus;
 			forceUpdate();
 		} else {
-			updateNotification({
+			notifications.update({
 				id: id,
 				color: 'red',
 				title: 'Update failed :(',

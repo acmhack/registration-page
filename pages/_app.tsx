@@ -1,7 +1,7 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { ModalsProvider } from '@mantine/modals';
 import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple } from '@mantine/core';
-import { NotificationsProvider } from '@mantine/notifications'
+import { Notifications } from '@mantine/notifications'
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -67,7 +67,7 @@ export default function App(props: AppProps) {
 					},
 					primaryColor: 'green'
 				}}>
-				<NotificationsProvider>
+				<Notifications />
 				<ModalsProvider>
 				<AppShell
 					navbar={
@@ -98,7 +98,6 @@ export default function App(props: AppProps) {
 					</UserProvider>
 				</AppShell>
 				</ModalsProvider>
-				</NotificationsProvider>
 			</MantineProvider>
 		</>
 	);
