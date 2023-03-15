@@ -1,11 +1,14 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedValue, useForceUpdate } from '@mantine/hooks';
 import { Title, Box, Stack, Button, Group, Grid, Checkbox, TextInput } from '@mantine/core';
-import { openModal } from '@mantine/modals';
+import { openModal, closeAllModals } from '@mantine/modals';
 import { NextPage } from 'next/types';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
+
+import { notifications } from '@mantine/notifications';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 import { getApplications, updateStatus } from '../utils/data';
 
@@ -63,6 +66,7 @@ const Admin: NextPage = () => {
 		}
 	}, [user, isLoading]);
 	
+	const forceUpdate = useForceUpdate();
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
 	const [records, setRecords] = useState<DBEntry[]>([])
 	const [initialRecords, setInitialRecords] = useState<DBEntry[]>([])
@@ -95,11 +99,50 @@ const Admin: NextPage = () => {
 		setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
 	}, [sortStatus]);
 
-	useEffect(() => {
-		setFetching(true)
-		getApplications().then(setInitialRecords); //TODO: Update table when setRecords
-		getApplications().then(setRecords) //setRecords(initialRecords)
+	const loadData = async () => {
+		setFetching(true);
+		const data = await getApplications();
+		setInitialRecords(data)
+		setRecords(data)
 		setFetching(false)
+	}
+
+	const updatePretty = async (id: string, userstatus : UserStatus, entry : DBEntry) => {
+		closeAllModals();
+		notifications.show({
+			id: id,
+			loading: true,
+			title: 'Update processing',
+			message: `Updating ${id}'s status to ${userstatus}`,
+			autoClose: false,
+		});
+		const requestStatus = await updateStatus(id, userstatus);
+		if (requestStatus == 200) {
+			notifications.update({
+				id: id,
+				color: 'teal',
+				title: 'Update successful',
+				message: 'Data was saved',
+				icon: <IconCheck size="1rem" />,
+				autoClose: 2000,
+			})
+			//faux local update
+			entry.userstatus = userstatus;
+			forceUpdate();
+		} else {
+			notifications.update({
+				id: id,
+				color: 'red',
+				title: 'Update failed :(',
+				message: 'Try again later',
+				icon: <IconX size="1rem" />,
+				autoClose: 2000,
+			})
+		}
+	}
+
+	useEffect(() => {
+		loadData()
 	}, []);
 
 	return (
@@ -157,10 +200,10 @@ const Admin: NextPage = () => {
 										<Grid.Col span={8}>{user.experience}</Grid.Col>
 									</Grid>
 										<Group position="center">
-											<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${user.id}`, 'Confirmation Pending')}>
+											<Button color="green" sx={{ width: '100%', maxWidth: 100 }} onClick={() => {updatePretty(`${user.id}`, 'Confirmation Pending', user);}}>
 												Admit
 											</Button>
-											<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus( `${user.id}`, 'Denied')}>
+											<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updatePretty( `${user.id}`, 'Denied', user)}>
 												Reject
 											</Button>
 										</Group>
