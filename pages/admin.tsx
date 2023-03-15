@@ -116,12 +116,10 @@ const Admin: NextPage = () => {
 					icon: <IconCheck size="1rem" />,
 					autoClose: 5000
 				});
-				setInitialRecords(initialRecords.map((record) => (record.id === entry.id ? { ...record, userstatus } : record)));
+				entry.userstatus = userstatus;
 			} else {
 				console.log(responseStatus);
 			}
-			modals.close('applicant-information-modal');
-			setUpdating(false);
 		} catch (err) {
 			notifications.update({
 				id,
@@ -131,9 +129,10 @@ const Admin: NextPage = () => {
 				icon: <IconX size="1rem" />,
 				autoClose: 5000
 			});
+			console.log(err);
+		} finally {
 			modals.close('applicant-information-modal');
 			setUpdating(false);
-			console.log(err);
 		}
 	};
 
@@ -143,7 +142,7 @@ const Admin: NextPage = () => {
 			setInitialRecords(records);
 			setRecords(records);
 			setFetching(false);
-		}); //TODO: Update table when setRecords
+		});
 	}, []);
 
 	return (
@@ -180,6 +179,7 @@ const Admin: NextPage = () => {
 						modals.open({
 							modalId: 'applicant-information-modal',
 							title: 'Applicant Information',
+							 
 							styles: {
 								root: { maxWidth: 500 }
 							},
