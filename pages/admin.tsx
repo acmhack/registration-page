@@ -116,7 +116,7 @@ const Admin: NextPage = () => {
 					icon: <IconCheck size="1rem" />,
 					autoClose: 5000
 				});
-				setInitialRecords(initialRecords.map((record) => (record.id === entry.id ? { ...record, userstatus } : record)));
+				entry.userstatus = userstatus;
 			} else {
 				console.log(responseStatus);
 			}
