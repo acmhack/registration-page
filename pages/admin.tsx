@@ -73,6 +73,7 @@ const Admin: NextPage = () => {
 	const [debouncedQuery] = useDebouncedValue(query, 200);
 	const [fetching, setFetching] = useState(false);
 	const [readyForReview, setReadyForReviewOnly] = useState(false);
+	const [updating, setUpdating] = useState<boolean>(false);
 
 	useEffect(() => {
 		const filteredRecords = initialRecords.filter((user: DBEntry) => {
@@ -101,6 +102,7 @@ const Admin: NextPage = () => {
 			message: `Updating ${id}'s status to ${userstatus}`,
 			autoClose: false
 		});
+		setUpdating(true);
 
 		try {
 			const responseStatus = await updateStatus(id, userstatus);
@@ -115,10 +117,11 @@ const Admin: NextPage = () => {
 					autoClose: 5000
 				});
 				setInitialRecords(initialRecords.map((record) => (record.id === entry.id ? { ...record, userstatus } : record)));
-				modals.close('applicant-information-modal');
 			} else {
 				console.log(responseStatus);
 			}
+			modals.close('applicant-information-modal');
+			setUpdating(false);
 		} catch (err) {
 			notifications.update({
 				id,
@@ -129,6 +132,7 @@ const Admin: NextPage = () => {
 				autoClose: 5000
 			});
 			modals.close('applicant-information-modal');
+			setUpdating(false);
 			console.log(err);
 		}
 	};
@@ -195,12 +199,17 @@ const Admin: NextPage = () => {
 									</Grid>
 									<Group position="center">
 										<Button
+											disabled={updating}
 											color="green"
 											sx={{ width: '100%', maxWidth: 100 }}
 											onClick={() => updatePretty(`${user.id}`, 'Confirmation Pending', user)}>
 											Admit
 										</Button>
-										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updatePretty(`${user.id}`, 'Denied', user)}>
+										<Button
+											disabled={updating}
+											color="red"
+											sx={{ width: '100%', maxWidth: 100 }}
+											onClick={() => updatePretty(`${user.id}`, 'Denied', user)}>
 											Reject
 										</Button>
 									</Group>
