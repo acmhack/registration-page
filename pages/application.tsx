@@ -334,6 +334,10 @@ const Application: NextPage = () => {
 												autoClose: 5000,
 												color: 'red'
 											});
+
+											if (!expired) {
+												notifications.hide(id);
+											}
 										}
 									});
 

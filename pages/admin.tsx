@@ -1,7 +1,7 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, Grid, Group, Stack, TextInput, Title } from '@mantine/core';
-import { useDebouncedValue, useForceUpdate } from '@mantine/hooks';
-import { closeAllModals, modals } from '@mantine/modals';
+import { useDebouncedValue } from '@mantine/hooks';
+import { modals } from '@mantine/modals';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { NextPage } from 'next/types';
@@ -66,7 +66,6 @@ const Admin: NextPage = () => {
 		}
 	}, [user, isLoading]);
 
-	const forceUpdate = useForceUpdate();
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
 	const [records, setRecords] = useState<DBEntry[]>([]);
 	const [initialRecords, setInitialRecords] = useState<DBEntry[]>([]);
@@ -95,36 +94,42 @@ const Admin: NextPage = () => {
 	}, [debouncedQuery, readyForReview, initialRecords, sortStatus]);
 
 	const updatePretty = async (id: string, userstatus: UserStatus, entry: DBEntry) => {
-		closeAllModals();
 		notifications.show({
-			id: id,
+			id,
 			loading: true,
 			title: 'Update processing',
 			message: `Updating ${id}'s status to ${userstatus}`,
 			autoClose: false
 		});
-		const requestStatus = await updateStatus(id, userstatus);
-		if (requestStatus == 200) {
+
+		try {
+			const responseStatus = await updateStatus(id, userstatus);
+
+			if (responseStatus == 200) {
+				notifications.update({
+					id,
+					color: 'teal',
+					title: 'Update successful',
+					message: 'Data was saved',
+					icon: <IconCheck size="1rem" />,
+					autoClose: 5000
+				});
+				setInitialRecords(initialRecords.map((record) => (record.id === entry.id ? { ...record, userstatus } : record)));
+				modals.close('applicant-information-modal');
+			} else {
+				console.log(responseStatus);
+			}
+		} catch (err) {
 			notifications.update({
-				id: id,
-				color: 'teal',
-				title: 'Update successful',
-				message: 'Data was saved',
-				icon: <IconCheck size="1rem" />,
-				autoClose: 2000
-			});
-			//faux local update
-			entry.userstatus = userstatus;
-			forceUpdate();
-		} else {
-			notifications.update({
-				id: id,
+				id,
 				color: 'red',
 				title: 'Update failed :(',
 				message: 'Try again later',
 				icon: <IconX size="1rem" />,
-				autoClose: 2000
+				autoClose: 5000
 			});
+			modals.close('applicant-information-modal');
+			console.log(err);
 		}
 	};
 
@@ -192,40 +197,10 @@ const Admin: NextPage = () => {
 										<Button
 											color="green"
 											sx={{ width: '100%', maxWidth: 100 }}
-											onClick={() => {
-												updatePretty(`${user.id}`, 'Confirmation Pending', user);
-											}}>
+											onClick={() => updatePretty(`${user.id}`, 'Confirmation Pending', user)}>
 											Admit
 										</Button>
 										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updatePretty(`${user.id}`, 'Denied', user)}>
-											Reject
-										</Button>
-									</Group>
-									<Group position="center">
-										<Button
-											color="green"
-											sx={{ width: '100%', maxWidth: 100 }}
-											onClick={() => {
-												console.log('admitted');
-												updateStatus(`${user.id}`, 'Confirmation Pending')
-													.then((status) => {
-														if (status === 200) {
-															setInitialRecords(
-																initialRecords.map((record) =>
-																	record.id === user.id ? { ...record, userstatus: 'Confirmation Pending' } : record
-																)
-															);
-															modals.close('applicant-information-modal');
-														}
-													})
-													.catch((err) => {
-														console.log(err);
-														modals.close('applicant-information-modal');
-													});
-											}}>
-											Admit
-										</Button>
-										<Button color="red" sx={{ width: '100%', maxWidth: 100 }} onClick={() => updateStatus(`${user.id}`, 'Denied')}>
 											Reject
 										</Button>
 									</Group>
