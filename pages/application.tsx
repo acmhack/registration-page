@@ -492,7 +492,7 @@ const Application: NextPage = () => {
 										data={otherURLs}
 										searchable
 										creatable
-										getCreateLabel={(query) => query}
+										getCreateLabel={(query) => `+ Add ${query}`}
 										onCreate={(query) => {
 											setOtherURLs([...form.values.otherSites, query]);
 											return query;
