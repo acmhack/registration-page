@@ -12,6 +12,10 @@ const NAV_LINK_STYLE: CSSObject = {
 	cursor: 'pointer',
 	position: 'relative',
 
+	'@media screen and (max-width: 600px)': {
+		fontSize: '0.8rem'
+	},
+
 	'&:hover': {
 		background: 'rgba(23, 145, 84, 0.7)'
 	},
@@ -26,14 +30,22 @@ const NAV_LINK_STYLE: CSSObject = {
 		top: 0,
 		left: 0,
 		height: '100%',
-		borderLeft: '8px solid #00673a'
+		borderLeft: '8px solid #00673a',
+
+		'@media screen and (max-width: 400px)': {
+			borderLeft: '4px solid #00673a'
+		}
 	},
 
 	'& a': {
 		color: 'white',
 		textDecoration: 'none',
 		padding: '0.75rem 1.5rem',
-		display: 'block'
+		display: 'block',
+
+		'@media screen and (max-width: 600px)': {
+			paddingLeft: '0.8rem'
+		}
 	}
 };
 
@@ -71,11 +83,11 @@ export default function App(props: AppProps) {
 				<ModalsProvider>
 					<AppShell
 						navbar={
-							<Navbar width={{ base: 300 }} bg="#0d874a" style={{ color: 'white' }}>
+							<Navbar width={{ base: '22vw' }} bg="#0d874a" style={{ color: 'white' }}>
 								<Link href="/">
-									<Image src="/logo-small.png" alt="Logo" width={200} mx="auto" my="lg" />
+									<Image src="/logo-small.png" alt="Logo" width="16vw" mx="auto" my="lg" />
 								</Link>
-								<Space h={50} />
+								<Space h="2vh" />
 								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 									<Link href="/dashboard">Dashboard</Link>
 								</Navbar.Section>
