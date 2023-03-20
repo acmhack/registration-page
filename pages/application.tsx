@@ -6,7 +6,6 @@ import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { useState, useEffect } from 'react';
-import { getUser } from '../utils/data'
 
 interface FormValues {
 	firstName: string;
@@ -294,8 +293,8 @@ const Application: NextPage = () => {
 	const router = useRouter();
 
 	useEffect(() => {
-		getUser().then((entry) => {
-			if (entry.userstatus != 'Profile Pending') {
+		axios.get<Applicant>('/api/me').then((res) => {
+			if (res.data.userStatus !== 'Profile Pending') {
 				setDisabled(true);
 			}
 		})
