@@ -9,7 +9,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 
 	const response = await axios.get(`${process.env.API_URL}/${id}`);
 
-	if (response.headers['Content-Length'] === 0) {
+	if (response.headers['content-length'] === '0') {
 		const newUser: DBEntry = {
 			id,
 			admin: false,
@@ -36,7 +36,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			mlhlogistics: false
 		};
 
-		await axios.put(`${process.env.API_URL}/${id}`, newUser);
+		await axios.put(`${process.env.API_URL}`, newUser);
 
 		return res.status(200).json(dbUserToApplicant(newUser));
 	}
