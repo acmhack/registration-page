@@ -275,7 +275,7 @@ const Application: NextPage = () => {
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			age: (value) => (/^\d{1,2}$/.test(value) ? null : 'Invalid age'),
-			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
+			phoneNumber: (value) => (value === '' || value === undefined || /^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
 			graduationYear: (value) => (/^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
 			graduationMonth: (value) => (value === '' ? 'Please select a graduation month' : null),
 			school: (value) => (value === '' ? 'Please enter your school' : null),
