@@ -6,6 +6,13 @@ export async function getApplications() : Promise<DBEntry[]> {
     })).data
 }
 
+export async function getUser() : Promise<DBEntry> {
+	const id = 0
+	return (await axios.get(`/api/users/${id}`, { //incredibly jank
+		responseType: "json",
+	})).data
+}
+
 export async function updateStatus(id: string, newUserStatus: UserStatus) {
 	const user : DBEntry = (await axios.get(`/api/users/${id}`, {
 			responseType: "json",
