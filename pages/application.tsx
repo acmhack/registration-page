@@ -299,7 +299,7 @@ const Application: NextPage = () => {
 				setDisabled(true);
 			}
 		})
-	})
+	}, [])
 
 	return (
 		<div>
