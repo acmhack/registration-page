@@ -5,7 +5,7 @@ import { notifications } from '@mantine/notifications';
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface FormValues {
 	firstName: string;
@@ -275,13 +275,13 @@ const Application: NextPage = () => {
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			age: (value) => (/^\d{1,2}$/.test(value) ? null : 'Invalid age'),
-			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
+			phoneNumber: (value) => (value === '' || value === undefined || /^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
 			graduationYear: (value) => (/^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
 			graduationMonth: (value) => (value === '' ? 'Please select a graduation month' : null),
 			school: (value) => (value === '' ? 'Please enter your school' : null),
 			linkedin: (value) =>
 				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
-			github: (value) => (value === '' || value === undefined || /^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
+			github: (value) => (value === '' || value === undefined || /^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL'),
 		}
 	});
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
@@ -289,7 +289,16 @@ const Application: NextPage = () => {
 	const [step, setStep] = useState<number>(0);
 	const { user } = useUser();
 	const [submitted, setSubmitted] = useState<boolean>(false);
+	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
+
+	useEffect(() => {
+		axios.get<Applicant>('/api/me').then((res) => {
+			if (res.data.userStatus !== 'Profile Pending') {
+				setDisabled(true);
+			}
+		})
+	}, [])
 
 	return (
 		<div>
@@ -373,6 +382,7 @@ const Application: NextPage = () => {
 
 						setSubmitted(true);
 					})}>
+					<fieldset disabled={disabled} style={{border: 0}}>
 					<Stepper
 						active={step}
 						onStepClick={(step: number) => {
@@ -383,7 +393,7 @@ const Application: NextPage = () => {
 						<Stepper.Step label="Personal Info">
 							<Box sx={{ maxWidth: 600 }} mx="auto">
 								<Stack>
-									<TextInput required label="First Name" {...form.getInputProps('firstName')} />
+									<TextInput disabled={disabled} required label="First Name" {...form.getInputProps('firstName')} />
 									<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
 									<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
 									<NativeSelect
@@ -492,7 +502,7 @@ const Application: NextPage = () => {
 										data={otherURLs}
 										searchable
 										creatable
-										getCreateLabel={(query) => query}
+										getCreateLabel={(query) => `+ Add ${query}`}
 										onCreate={(query) => {
 											setOtherURLs([...form.values.otherSites, query]);
 											return query;
@@ -583,6 +593,7 @@ const Application: NextPage = () => {
 							</Box>
 						</Stepper.Step>
 					</Stepper>
+					</fieldset>
 				</form>
 			</Box>
 		</div>
