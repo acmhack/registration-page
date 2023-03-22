@@ -4,6 +4,7 @@ import {
   Checkbox,
   CheckboxProps,
   Group,
+  Loader,
   Space,
   Stack,
   Switch,
@@ -20,7 +21,7 @@ import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { NextPage } from "next/types";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from 'react';
 import { calculateRemainingTime } from "../utils/utils";
 
 interface Applicant {
@@ -160,25 +161,44 @@ const Status: FC<{
 };
 
 const Dashboard: NextPage = () => {
-  const { user, isLoading } = useUser();
-  const router = useRouter();
-  const [lft, setLFT] = useState<boolean>(true);
-  const [[days, hours, minutes, seconds], setCountdown] = useState<
-    [number, number, number, number]
-  >(calculateRemainingTime());
-  const smol = useMediaQuery("screen and (max-width: 1000px)");
-  const [applicant, setApplicant] = useState<Applicant | null>(null);
-  const [confirming, setConfirming] = useState<boolean>(false);
+	const { user, isLoading } = useUser();
+	const router = useRouter();
+	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
+	const smol = useMediaQuery('screen and (max-width: 1000px)');
+	const [applicant, setApplicant] = useState<Applicant | null>(null);
+	const [confirming, setConfirming] = useState<boolean>(false);
+	const [lft, setLFT] = useState<boolean>(false);
+	const [togglingLFT, setTogglingLFT] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!user && !isLoading) {
-      router.replace("/api/auth/login");
-    } else if (!isLoading) {
-      axios.get("/api/me").then((res) => {
-        setApplicant(res.data);
-      });
-    }
-  }, [user, router, isLoading]);
+	const toggleLFT = useCallback(() => {
+		setTogglingLFT(true);
+
+		axios
+			.post('/api/lft')
+			.then(() => {
+				setLFT((lft) => !lft);
+			})
+			.catch((err: AxiosError) => {
+				if (err.response) {
+					console.log(err.response);
+					notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
+				}
+			})
+			.finally(() => {
+				setTogglingLFT(false);
+			});
+	}, []);
+
+	useEffect(() => {
+		if (!user && !isLoading) {
+			router.replace('/api/auth/login');
+		} else if (!isLoading) {
+			axios.get<Applicant>('/api/me').then((res) => {
+				setApplicant(res.data);
+				setLFT(res.data.lookingForTeam);
+			});
+		}
+	}, [user, router, isLoading]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -258,7 +278,6 @@ const Dashboard: NextPage = () => {
 
                 setConfirming(false);
               });
-
             setConfirming(true);
           }}
           confirming={confirming}
@@ -279,10 +298,7 @@ const Dashboard: NextPage = () => {
             Team Status
           </Title>
           <Group position="center" noWrap>
-            <Switch
-              onChange={(evt) => setLFT(evt.target.checked)}
-              checked={lft}
-            />
+            <Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft}/>
             {lft ? (
               <Text inline style={{ whiteSpace: "nowrap" }}>
                 Looking for a team
@@ -290,6 +306,7 @@ const Dashboard: NextPage = () => {
             ) : (
               <Text inline>Not looking for a team</Text>
             )}
+            {togglingLFT && <Loader size="sm" />}
           </Group>
         </Flex>
         {applicant.attendingPrehacks && (
