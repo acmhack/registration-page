@@ -22,6 +22,7 @@ import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { useEffect, useState } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 
 interface FormValues {
 	firstName: string;
@@ -308,6 +309,7 @@ const Application: NextPage = () => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
+	const mobile = useMediaQuery("screen and (max-width: 600px)");
 
 	useEffect(() => {
 		axios.get<Applicant>('/api/me').then((res) => {
@@ -318,7 +320,7 @@ const Application: NextPage = () => {
 	}, []);
 
 	return (
-		<div>
+		<div style={{paddingLeft: (mobile ? "100px" : "15vw")}}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto">
 				<form
 					onSubmit={form.onSubmit((values) => {
