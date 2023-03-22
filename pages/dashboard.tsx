@@ -1,5 +1,5 @@
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title } from '@mantine/core';
+import { Button, Checkbox, CheckboxProps, Group, Space, Stack, Switch, Text, Title, Flex, MediaQuery } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
@@ -151,95 +151,103 @@ const Dashboard: NextPage = () => {
 	}
 
 	return (
-		<div>
-			<Title>
-				Welcome, {applicant.firstName} {applicant.lastName}
-			</Title>
-			<Status
-				applicant={applicant}
-				onConfirm={() => {
-					axios
-						.post('/api/confirm')
-						.then((res) => {
-							setConfirming(false);
-							setApplicant(res.data);
-						})
-						.catch((err: AxiosError) => {
-							if (err.response) {
-								console.log(err.response);
-								notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
-							}
+		<MediaQuery
+			query="(max-width: 1250px)"
+			styles={{ paddingLeft: "100px" }}
+		>
+			<Flex justify="center" align="center" direction="column" gap="lg" style={{height: "100%"}}>
+				<Title>
+					Welcome, {applicant.firstName} {applicant.lastName}
+				</Title>
+				<Status
+					applicant={applicant}
+					onConfirm={() => {
+						axios
+							.post('/api/confirm')
+							.then((res) => {
+								setConfirming(false);
+								setApplicant(res.data);
+							})
+							.catch((err: AxiosError) => {
+								if (err.response) {
+									console.log(err.response);
+									notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
+								}
 
-							setConfirming(false);
-						});
+								setConfirming(false);
+							});
 
-					setConfirming(true);
-				}}
-				confirming={confirming}
-			/>
-			<Space h="lg" />
-			<Title order={2}>Team Status</Title>
-			<Group>
-				<Switch onChange={(evt) => setLFT(evt.target.checked)} checked={lft} />
-				{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
-			</Group>
-			<Space h="lg" />
-			{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
-			<Title order={4}>Hackathon Date: April 14th-16th</Title>
-			{!smol ? (
-				<Group spacing={4} align="end">
-					<Title mb={16} mr={16}>
-						T-minus
-					</Title>
-					<Title order={1} size={96}>
-						{days}
-					</Title>
-					<Title order={2} mb={16}>
-						d
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{hours < 10 ? '0' + hours : hours}
-					</Title>
-					<Title order={2} mb={16}>
-						h
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{minutes < 10 ? '0' + minutes : minutes}
-					</Title>
-					<Title order={2} mb={16}>
-						m
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{seconds < 10 ? '0' + seconds : seconds}
-					</Title>
-					<Title order={2} mb={16}>
-						s
-					</Title>
-				</Group>
-			) : (
-				<Group spacing={0} align="end">
-					<Title>T-minus</Title>
-					<Space w={16} />
-					<Title>{days}</Title>
-					<Text size="sm">d</Text>
-					<Title>:{hours}</Title>
-					<Text size="sm">h</Text>
-					<Title>:{minutes}</Title>
-					<Text size="sm">m</Text>
-					<Title>:{seconds}</Title>
-					<Text size="sm">s</Text>
-				</Group>
-			)}
-		</div>
+						setConfirming(true);
+					}}
+					confirming={confirming}
+				/>
+				<Space h="lg" />
+				<Title order={2}>Team Status</Title>
+				<Group>
+					<Switch onChange={(evt) => setLFT(evt.target.checked)} checked={lft} />
+					{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
+				</Group
+				<Space h="lg" />
+				{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
+				<Title order={2} align="center"><span style={{color: "#148648"}}>PickHacks Date:</span> April 14th-16th</Title>
+				{!smol ? (
+					<Group spacing={0} align="center" position='center'>
+						<Title order={2} mr={16} style={{color: "#148648"}}>
+							PickHacks Countdown: 
+						</Title>
+						<Title size={36}>
+							{days}
+						</Title>
+						<Title order={2} style={{alignSelf: "flex-end"}}>
+							d
+						</Title>
+						<Title size={36} mx={8}>
+							:
+						</Title>
+						<Title size={36}>
+							{hours < 10 ? '0' + hours : hours}
+						</Title>
+						<Title order={2} style={{alignSelf: "flex-end"}}>
+							h
+						</Title>
+						<Title size={36} mx={8}>
+							:
+						</Title>
+						<Title size={36}>
+							{minutes < 10 ? '0' + minutes : minutes}
+						</Title>
+						<Title order={2} style={{alignSelf: "flex-end"}}>
+							m
+						</Title>
+						<Title size={36} mx={8}>
+							:
+						</Title>
+						<Title size={36}>
+							{seconds < 10 ? '0' + seconds : seconds}
+						</Title>
+						<Title order={2} style={{alignSelf: "flex-end"}}>
+							s
+						</Title>
+					</Group>
+				) : (
+					<Group spacing={0} align="center" position='center'>
+						<Title order={2} align="center" style={{color: "#148648"}}>PickHacks Countdown: </Title>
+						<Space w={16} />
+						<Title>{days}</Title>
+						<Title size="sm" mb={5} style={{alignSelf: "flex-end"}}>d</Title>
+						<Title mx={5}>:</Title>
+						<Title>{hours}</Title>
+						<Title size="sm" mb={5} style={{alignSelf: "flex-end"}}>h</Title>
+						<Title mx={5}>:</Title>
+						<Title>{minutes}</Title>
+						<Title size="sm" mb={5} style={{alignSelf: "flex-end"}}>m</Title>
+						<Title mx={5}>:</Title>
+						<Title>{seconds}</Title>
+						<Title size="sm" mb={5} style={{alignSelf: "flex-end"}}>s</Title>
+					</Group>
+				)}
+			</Flex>
+		</MediaQuery>
 	);
 };
 
