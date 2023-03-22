@@ -186,7 +186,7 @@ const Dashboard: NextPage = () => {
 				<Group>
 					<Switch onChange={(evt) => setLFT(evt.target.checked)} checked={lft} />
 					{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
-				</Group
+				</Group>
 				<Space h="lg" />
 				{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
 				<Title order={2} align="center"><span style={{color: "#148648"}}>PickHacks Date:</span> April 14th-16th</Title>
