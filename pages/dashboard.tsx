@@ -1,108 +1,163 @@
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import { Button, Checkbox, CheckboxProps, Group, Loader, Space, Stack, Switch, Text, Title } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
-import axios, { AxiosError } from 'axios';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { NextPage } from 'next/types';
+import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import {
+  Button,
+  Checkbox,
+  CheckboxProps,
+  Group,
+  Loader,
+  Space,
+  Stack,
+  Switch,
+  Text,
+  Title,
+  Flex,
+  MediaQuery,
+  Container,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import axios, { AxiosError } from "axios";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { NextPage } from "next/types";
 import { FC, useCallback, useEffect, useState } from 'react';
-import { calculateRemainingTime } from '../utils/utils';
+import { calculateRemainingTime } from "../utils/utils";
 
 interface Applicant {
-	firstName: string;
-	lastName: string;
-	email: string;
-	userStatus: UserStatus;
-	age: string;
-	phoneNumber: string;
-	country: string;
-	school: string;
-	levelOfStudy: string;
-	graduationMonth: string;
-	graduationYear: string;
-	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
-	dietRestrictions: string[];
-	hackathonCount: string;
-	resume: string | null;
-	linkedin?: string;
-	github?: string;
-	otherSites: string[];
-	attendingPrehacks: boolean;
-	lookingForTeam: boolean;
-	codeOfConductAgreement: boolean;
-	dataAgreement: boolean;
-	mlhAgreement: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userStatus: UserStatus;
+  age: string;
+  phoneNumber: string;
+  country: string;
+  school: string;
+  levelOfStudy: string;
+  graduationMonth: string;
+  graduationYear: string;
+  shirtSize: "XS" | "S" | "M" | "L" | "XL" | "XXL";
+  dietRestrictions: string[];
+  hackathonCount: string;
+  resume: string | null;
+  linkedin?: string;
+  github?: string;
+  otherSites: string[];
+  attendingPrehacks: boolean;
+  lookingForTeam: boolean;
+  codeOfConductAgreement: boolean;
+  dataAgreement: boolean;
+  mlhAgreement: boolean;
 }
 
-function makeIcon(checked: boolean): CheckboxProps['icon'] {
-	const CheckboxIcon: CheckboxProps['icon'] = ({ className }) => (checked ? <IconCheck className={className} /> : <IconX className={className} />);
+function makeIcon(checked: boolean): CheckboxProps["icon"] {
+  const CheckboxIcon: CheckboxProps["icon"] = ({ className }) =>
+    checked ? (
+      <IconCheck className={className} />
+    ) : (
+      <IconX className={className} />
+    );
 
-	return CheckboxIcon;
+  return CheckboxIcon;
 }
 
-const Status: FC<{ applicant: Applicant; onConfirm: () => void; confirming: boolean }> = ({ applicant, onConfirm, confirming }) => {
-	return (
-		<Stack spacing={6}>
-			<Title order={2}>Your Pre-Hackathon Checklist:</Title>
-			<Stack spacing={6} ml="lg">
-				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
-					<Group>
-						<Checkbox
-							readOnly
-							checked
-							icon={makeIcon(applicant.userStatus !== 'Profile Pending')}
-							color={applicant.userStatus !== 'Profile Pending' ? 'green' : 'red'}
-						/>
-						<Text>Profile Completed</Text>
-					</Group>
-					{applicant.userStatus === 'Profile Pending' && (
-						<Text weight="bold">
-							Complete your application in the <Link href="/application">application tab</Link>
-						</Text>
-					)}
-				</Group>
-				<Group>
-					<Checkbox
-						readOnly
-						checked
-						icon={makeIcon(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending')}
-						color={applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending' ? 'green' : 'red'}
-					/>
-					<Text>Admitted</Text>
-				</Group>
-				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
-					<Group>
-						<Checkbox
-							readOnly
-							checked
-							icon={makeIcon(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In')}
-							color={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'green' : 'red'}
-						/>
-						<Text>Confirmed</Text>
-					</Group>
-					{applicant.userStatus === 'Confirmation Pending' && (
-						<Group>
-							<Button compact loading={confirming} onClick={onConfirm}>
-								I will attend!
-							</Button>
-							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
-						</Group>
-					)}
-				</Group>
-				<Group>
-					<Checkbox
-						readOnly
-						checked
-						icon={makeIcon(applicant.userStatus === 'Checked In')}
-						color={applicant.userStatus === 'Checked In' ? 'green' : 'red'}
-					/>
-					<Text>Checked In</Text>
-				</Group>
-			</Stack>
-		</Stack>
-	);
+const Status: FC<{
+  applicant: Applicant;
+  onConfirm: () => void;
+  confirming: boolean;
+}> = ({ applicant, onConfirm, confirming }) => {
+  return (
+    <Stack
+      spacing={10}
+      p={25}
+      justify="center"
+      style={{
+        backgroundColor: "rgba(20, 134, 72, .2)",
+        borderRadius: 15,
+      }}
+    >
+      <Title order={2} inline align="center" color={"#148648"}>
+        PickHacks Checklist:
+      </Title>
+      <Stack spacing={6} ml="lg">
+        <Group maw={640} sx={{ justifyContent: "space-between" }}>
+          <Group>
+            <Checkbox
+              readOnly
+              checked
+              icon={makeIcon(applicant.userStatus !== "Profile Pending")}
+              color={
+                applicant.userStatus !== "Profile Pending" ? "green" : "red"
+              }
+            />
+            <Text>Profile Completed</Text>
+          </Group>
+          {applicant.userStatus === "Profile Pending" && (
+            <Text weight="bold">
+              Complete your application in the{" "}
+              <Link href="/application">application tab</Link>
+            </Text>
+          )}
+        </Group>
+        <Group>
+          <Checkbox
+            readOnly
+            checked
+            icon={makeIcon(
+              applicant.userStatus !== "Profile Pending" &&
+                applicant.userStatus !== "Admission Pending"
+            )}
+            color={
+              applicant.userStatus !== "Profile Pending" &&
+              applicant.userStatus !== "Admission Pending"
+                ? "green"
+                : "red"
+            }
+          />
+          <Text>Admitted</Text>
+        </Group>
+        <Group maw={640} sx={{ justifyContent: "space-between" }}>
+          <Group>
+            <Checkbox
+              readOnly
+              checked
+              icon={makeIcon(
+                applicant.userStatus === "Confirmed" ||
+                  applicant.userStatus === "Checked In"
+              )}
+              color={
+                applicant.userStatus === "Confirmed" ||
+                applicant.userStatus === "Checked In"
+                  ? "green"
+                  : "red"
+              }
+            />
+            <Text>Confirmed</Text>
+          </Group>
+          {applicant.userStatus === "Confirmation Pending" && (
+            <Group>
+              <Button compact loading={confirming} onClick={onConfirm}>
+                I will attend!
+              </Button>
+              <Text weight="bold">
+                Confirmation Deadline:{" "}
+                {new Date(2023, 3, 9).toLocaleDateString()}
+              </Text>
+            </Group>
+          )}
+        </Group>
+        <Group>
+          <Checkbox
+            readOnly
+            checked
+            icon={makeIcon(applicant.userStatus === "Checked In")}
+            color={applicant.userStatus === "Checked In" ? "green" : "red"}
+          />
+          <Text>Checked In</Text>
+        </Group>
+      </Stack>
+    </Stack>
+  );
 };
 
 const Dashboard: NextPage = () => {
@@ -145,125 +200,224 @@ const Dashboard: NextPage = () => {
 		}
 	}, [user, router, isLoading]);
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setCountdown(calculateRemainingTime());
-		}, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown(calculateRemainingTime());
+    }, 1000);
 
-		return () => {
-			clearInterval(interval);
-		};
-	}, []);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
-	if (!applicant) {
-		return (
-			<div>
+  if (!applicant) {
+    return (
+		<MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: "100px" }}>
+			<Flex
+			justify="center"
+			align="center"
+			direction="column"
+			gap={40}
+			style={{ height: "100%" }}
+			>
 				<Title>Loading...</Title>
-			</div>
-		);
-	}
+			</Flex>
+		</MediaQuery>
+    );
+  }
 
-	if (applicant.userStatus === 'Denied') {
-		return (
-			<div>
-				<Title color="red">Sorry, your application has been denied.</Title>
-			</div>
-		);
-	}
+  if (applicant.userStatus === "Denied") {
+    return (
+      <div>
+        <Title color="red">Sorry, your application has been denied.</Title>
+      </div>
+    );
+  }
 
-	return (
-		<div>
-			<Title>
-				Welcome, {applicant.firstName} {applicant.lastName}
-			</Title>
-			<Status
-				applicant={applicant}
-				onConfirm={() => {
-					axios
-						.post('/api/confirm')
-						.then((res) => {
-							setConfirming(false);
-							setApplicant(res.data);
-						})
-						.catch((err: AxiosError) => {
-							if (err.response) {
-								console.log(err.response);
-								notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
-							}
+  return (
+    <MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: "100px" }}>
+      <Flex
+        justify="center"
+        align="center"
+        direction="column"
+        gap={40}
+        style={{ height: "100%" }}
+      >
+        <MediaQuery
+          query="(max-width: 1100px)"
+          styles={{ flexDirection: "column" }}
+        >
+          <Flex mt={20}>
+            <Title inline align="center">
+              Welcome,&nbsp;
+            </Title>
+            <Title inline align="center">
+              {applicant.firstName} {applicant.lastName}!
+            </Title>
+          </Flex>
+        </MediaQuery>
+        <Status
+          applicant={applicant}
+          onConfirm={() => {
+            axios
+              .post("/api/confirm")
+              .then((res) => {
+                setConfirming(false);
+                setApplicant(res.data);
+              })
+              .catch((err: AxiosError) => {
+                if (err.response) {
+                  console.log(err.response);
+                  notifications.show({
+                    message: err.response.data as string,
+                    title: "Something went wrong...",
+                    autoClose: 5000,
+                    color: "red",
+                  });
+                }
 
-							setConfirming(false);
-						});
-
-					setConfirming(true);
-				}}
-				confirming={confirming}
-			/>
-			<Space h="lg" />
-			<Title order={2}>Team Status</Title>
-			<Group>
-				<Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft} />
-				{lft ? <Text>I am still looking for a team</Text> : <Text>I am no longer looking for a team</Text>}
-				{togglingLFT && <Loader size="sm" />}
-			</Group>
-			<Space h="lg" />
-			{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
-			<Title order={4}>Hackathon Date: April 14th-16th</Title>
-			{!smol ? (
-				<Group spacing={4} align="end">
-					<Title mb={16} mr={16}>
-						T-minus
-					</Title>
-					<Title order={1} size={96}>
-						{days}
-					</Title>
-					<Title order={2} mb={16}>
-						d
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{hours < 10 ? '0' + hours : hours}
-					</Title>
-					<Title order={2} mb={16}>
-						h
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{minutes < 10 ? '0' + minutes : minutes}
-					</Title>
-					<Title order={2} mb={16}>
-						m
-					</Title>
-					<Title order={1} size={48} mb={32} mx={8}>
-						:
-					</Title>
-					<Title order={1} size={96}>
-						{seconds < 10 ? '0' + seconds : seconds}
-					</Title>
-					<Title order={2} mb={16}>
-						s
-					</Title>
-				</Group>
-			) : (
-				<Group spacing={0} align="end">
-					<Title>T-minus</Title>
-					<Space w={16} />
-					<Title>{days}</Title>
-					<Text size="sm">d</Text>
-					<Title>:{hours}</Title>
-					<Text size="sm">h</Text>
-					<Title>:{minutes}</Title>
-					<Text size="sm">m</Text>
-					<Title>:{seconds}</Title>
-					<Text size="sm">s</Text>
-				</Group>
-			)}
-		</div>
-	);
+                setConfirming(false);
+              });
+            setConfirming(true);
+          }}
+          confirming={confirming}
+        />
+        <Flex
+          direction="column"
+          justify="center"
+          align="center"
+          gap={10}
+          px={25}
+          py={20}
+          style={{
+            backgroundColor: "rgba(20, 134, 72, .2)",
+            borderRadius: 15,
+          }}
+        >
+          <Title order={2} align="center" inline color={"#148648"}>
+            Team Status
+          </Title>
+          <Group position="center" noWrap>
+            <Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft}/>
+            {lft ? (
+              <Text inline style={{ whiteSpace: "nowrap" }}>
+                Looking for a team
+              </Text>
+            ) : (
+              <Text inline>Not looking for a team</Text>
+            )}
+            {togglingLFT && <Loader size="sm" />}
+          </Group>
+        </Flex>
+        {applicant.attendingPrehacks && (
+          <Title order={4}>Prehacks Date: April 6th</Title>
+        )}
+        <Flex
+          direction="column"
+          justify="center"
+          align="center"
+          gap={10}
+          px={25}
+          py={20}
+          style={{
+            backgroundColor: "rgba(20, 134, 72, .2)",
+            borderRadius: 15,
+          }}
+        >
+          <Title order={2} align="center" color={"#148648"} inline>
+            PickHacks Date:
+          </Title>
+          <Title order={2} align="center" inline>
+            April 14th-16th
+          </Title>
+        </Flex>
+        {!smol ? (
+          <Group
+            spacing={0}
+            align="center"
+            position="center"
+            px={25}
+            py={20}
+            style={{
+              backgroundColor: "rgba(20, 134, 72, .2)",
+              borderRadius: 15,
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            <Title order={2} mr={16} inline style={{ color: "#148648" }}>
+              PickHacks Countdown:
+            </Title>
+            <Flex>
+              <Title size={36}>{days}</Title>
+              <Title order={2} style={{ alignSelf: "flex-end" }}>
+                d
+              </Title>
+              <Title size={36} mx={8}>
+                :
+              </Title>
+              <Title size={36}>{hours < 10 ? "0" + hours : hours}</Title>
+              <Title order={2} style={{ alignSelf: "flex-end" }}>
+                h
+              </Title>
+              <Title size={36} mx={8}>
+                :
+              </Title>
+              <Title size={36}>{minutes < 10 ? "0" + minutes : minutes}</Title>
+              <Title order={2} style={{ alignSelf: "flex-end" }}>
+                m
+              </Title>
+              <Title size={36} mx={8}>
+                :
+              </Title>
+              <Title size={36}>{seconds < 10 ? "0" + seconds : seconds}</Title>
+              <Title order={2} style={{ alignSelf: "flex-end" }}>
+                s
+              </Title>
+            </Flex>
+          </Group>
+        ) : (
+          <Group
+            spacing={0}
+            align="center"
+            position="center"
+            p={20}
+            style={{
+              backgroundColor: "rgba(20, 134, 72, .2)",
+              borderRadius: 15,
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            <Title order={2} align="center" inline style={{ color: "#148648" }}>
+              PickHacks Countdown:{" "}
+            </Title>
+            <div style={{ display: "flex" }}>
+              <Title>{days}</Title>
+              <Title size="sm" mb={5} style={{ alignSelf: "flex-end" }}>
+                d
+              </Title>
+              <Title mx={5}>:</Title>
+              <Title>{hours}</Title>
+              <Title size="sm" mb={5} style={{ alignSelf: "flex-end" }}>
+                h
+              </Title>
+              <Title mx={5}>:</Title>
+              <Title>{minutes}</Title>
+              <Title size="sm" mb={5} style={{ alignSelf: "flex-end" }}>
+                m
+              </Title>
+              <Title mx={5}>:</Title>
+              <Title>{seconds}</Title>
+              <Title size="sm" mb={5} style={{ alignSelf: "flex-end" }}>
+                s
+              </Title>
+            </div>
+          </Group>
+        )}
+      </Flex>
+    </MediaQuery>
+  );
 };
 
-export default withPageAuthRequired(Dashboard, { returnTo: '/dashboard' });
-
+export default withPageAuthRequired(Dashboard, { returnTo: "/dashboard" });

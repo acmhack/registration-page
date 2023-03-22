@@ -1,6 +1,6 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, Grid, Group, Stack, TextInput, Title } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
@@ -74,6 +74,7 @@ const Admin: NextPage = () => {
 	const [fetching, setFetching] = useState(false);
 	const [readyForReview, setReadyForReviewOnly] = useState(false);
 	const [updating, setUpdating] = useState<boolean>(false);
+	const mobile = useMediaQuery("screen and (max-width: 600px)");
 
 	useEffect(() => {
 		const filteredRecords = initialRecords.filter((user: DBEntry) => {
@@ -146,7 +147,7 @@ const Admin: NextPage = () => {
 	}, []);
 
 	return (
-		<div>
+		<div style={{paddingLeft: (mobile ? "100px" : "15vw")}}>
 			<Title>Admin Panel</Title>
 			<Grid align="center" gutter="xs" my="md">
 				<Grid.Col xs={8} sm={9}>

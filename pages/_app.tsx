@@ -12,7 +12,7 @@ const NAV_LINK_STYLE: CSSObject = {
 	cursor: 'pointer',
 	position: 'relative',
 
-	'@media screen and (max-width: 600px)': {
+	'@media screen and (max-width: 800px)': {
 		fontSize: '0.8rem'
 	},
 
@@ -57,6 +57,7 @@ export default function App(props: AppProps) {
 			<Head>
 				<title>PickHacks Registration</title>
 				<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+				<link rel="shortcut icon" href="favicon.ico" />
 			</Head>
 
 			<MantineProvider
@@ -83,9 +84,9 @@ export default function App(props: AppProps) {
 				<ModalsProvider>
 					<AppShell
 						navbar={
-							<Navbar width={{ base: '22vw' }} bg="#0d874a" style={{ color: 'white' }}>
+							<Navbar bg="#0d874a" style={{ color: 'white', maxWidth: "250px", minWidth: "100px", width: "15vw" }}>
 								<Link href="/">
-									<Image src="/logo-small.png" alt="Logo" width="16vw" mx="auto" my="lg" />
+									<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "175px", width: "12vw"}}/>
 								</Link>
 								<Space h="2vh" />
 								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
