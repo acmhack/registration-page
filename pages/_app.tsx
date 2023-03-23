@@ -94,16 +94,16 @@ export default function App(props: AppProps) {
 								</Link>
 								<Space h="2vh" />
 								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/dashboard">Dashboard</Link>
+									<Link href="/dashboard" onClick={toggle}>Dashboard</Link>
 								</Navbar.Section>
 								<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/application">Application</Link>
+									<Link href="/application" onClick={toggle}>Application</Link>
 								</Navbar.Section>
 								<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/admin">Admin</Link>
+									<Link href="/admin" onClick={toggle}>Admin</Link>
 								</Navbar.Section>
 								<Navbar.Section sx={NAV_LINK_STYLE}>
-									<a href="/api/auth/logout">Logout</a>
+									<a href="/api/auth/logout" onClick={toggle}>Logout</a>
 								</Navbar.Section>
 							</Navbar>}
 							</> :

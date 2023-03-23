@@ -280,7 +280,6 @@ const Dashboard: NextPage = () => {
 						) : (
 							<Text inline>Not looking for a team</Text>
 						)}
-						{togglingLFT && <Loader size="sm" />}
 					</Group>
 				</Flex>
 				{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
