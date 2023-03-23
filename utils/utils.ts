@@ -1,5 +1,5 @@
 export function calculateRemainingTime(): [number, number, number, number] {
-	const remainingTime = (new Date(2023, 3, 14, 12).valueOf() - Date.now()) / 1000;
+	const remainingTime = (new Date(2023, 3, 14, 16).valueOf() - Date.now()) / 1000;
 
 	const seconds = Math.floor(remainingTime % 60);
 	const minutes = Math.floor(remainingTime / 60) % 60;
