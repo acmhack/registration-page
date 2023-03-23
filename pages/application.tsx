@@ -309,7 +309,7 @@ const Application: NextPage = () => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
-	const mobile = useMediaQuery("screen and (max-width: 600px)");
+	const mobile = useMediaQuery("screen and (max-width: 700px)");
 
 	useEffect(() => {
 		axios.get<Applicant>('/api/me').then((res) => {
@@ -320,8 +320,8 @@ const Application: NextPage = () => {
 	}, []);
 
 	return (
-		<div style={{paddingLeft: (mobile ? "100px" : "15vw")}}>
-			<Box sx={{ maxWidth: 1200 }} mx="auto">
+		<div style={{paddingLeft: (mobile ? "0px" : "15vw")}}>
+			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
 						if (!user) {

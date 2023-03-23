@@ -22,6 +22,11 @@ import { useRouter } from "next/router";
 import { NextPage } from "next/types";
 import { FC, useEffect, useState } from "react";
 import { calculateRemainingTime } from "../utils/utils";
+import localFont from 'next/font/local';
+import { Merriweather_Sans } from 'next/font/google';
+
+const WelcomeFont = localFont({ src: './fonts/IntroScript.otf' });
+const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ["300", "400", "700"] });
 
 interface Applicant {
   firstName: string;
@@ -166,7 +171,7 @@ const Dashboard: NextPage = () => {
   const [[days, hours, minutes, seconds], setCountdown] = useState<
     [number, number, number, number]
   >(calculateRemainingTime());
-  const smol = useMediaQuery("screen and (max-width: 1000px)");
+  const smol = useMediaQuery("screen and (max-width: 700px)");
   const [applicant, setApplicant] = useState<Applicant | null>(null);
   const [confirming, setConfirming] = useState<boolean>(false);
 
@@ -192,7 +197,6 @@ const Dashboard: NextPage = () => {
 
   if (!applicant) {
     return (
-		<MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: "100px" }}>
 			<Flex
 			justify="center"
 			align="center"
@@ -202,7 +206,6 @@ const Dashboard: NextPage = () => {
 			>
 				<Title>Loading...</Title>
 			</Flex>
-		</MediaQuery>
     );
   }
 
@@ -215,27 +218,19 @@ const Dashboard: NextPage = () => {
   }
 
   return (
-    <MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: "100px" }}>
+    <MediaQuery query="(max-width: 1300px) and (min-width: 701px)" styles={{ paddingLeft: "15vw" }}>
       <Flex
-        justify="center"
+
         align="center"
         direction="column"
         gap={40}
         style={{ height: "100%" }}
       >
-        <MediaQuery
-          query="(max-width: 1100px)"
-          styles={{ flexDirection: "column" }}
-        >
-          <Flex mt={20}>
-            <Title inline align="center">
-              Welcome,&nbsp;
-            </Title>
-            <Title inline align="center">
-              {applicant.firstName} {applicant.lastName}!
-            </Title>
-          </Flex>
-        </MediaQuery>
+        <Flex w="100%" bg="#E9FFF2" justify={"center"} p={10}>
+          <Title size={smol ? 30 : 50} inline align="center" className={WelcomeFont.className} color="#0C8746" style={{filter: "drop-shadow(2px 3px rgba(12, 135, 70, .4))", fontWeight: "normal"}}>
+            Welcome, {applicant.firstName} {applicant.lastName}!
+          </Title>
+        </Flex>
         <Status
           applicant={applicant}
           onConfirm={() => {

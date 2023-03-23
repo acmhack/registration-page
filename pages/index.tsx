@@ -19,10 +19,7 @@ const Index: NextPage = () => {
 	}
 
 	return (
-		<MediaQuery
-			query="(max-width: 1275px)"
-			styles={{ paddingLeft: "100px" }}
-		>
+		<MediaQuery query="(max-width: 1100px) and (min-width: 701px)" styles={{ paddingLeft: "15vw" }}>
 			<Flex justify="center" align="center" direction="column" gap="lg" style={{height: "100%"}}>
 				<Title align="center">Welcome to PickHacks Registration!</Title>
 				<Text align="center" fz="lg">

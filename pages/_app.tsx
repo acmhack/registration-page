@@ -1,7 +1,8 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
-import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple } from '@mantine/core';
+import { AppShell, CSSObject, Image, MantineProvider, Navbar, Space, Tuple, Burger, MediaQuery, Header, Text, Flex } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -51,6 +52,8 @@ const NAV_LINK_STYLE: CSSObject = {
 
 export default function App(props: AppProps) {
 	const { Component, pageProps, router } = props;
+	const [opened, { toggle }] = useDisclosure(false);
+	const mobile = useMediaQuery("screen and (max-width: 700px)");
 
 	return (
 		<>
@@ -82,9 +85,10 @@ export default function App(props: AppProps) {
 				}}>
 				<Notifications position="top-right" />
 				<ModalsProvider>
-					<AppShell
+					<AppShell padding={0}
 						navbar={
-							<Navbar bg="#0d874a" style={{ color: 'white', maxWidth: "250px", minWidth: "100px", width: "15vw" }}>
+							mobile ? <>{opened && 
+								<Navbar bg="#0d874a" style={{ color: 'white', width: "100vw", border: "none" }}>
 								<Link href="/">
 									<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "175px", width: "12vw"}}/>
 								</Link>
@@ -95,17 +99,52 @@ export default function App(props: AppProps) {
 								<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 									<Link href="/application">Application</Link>
 								</Navbar.Section>
-								{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-								<Link href="/team">Team</Link>
-							</Navbar.Section> */}
 								<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 									<Link href="/admin">Admin</Link>
 								</Navbar.Section>
 								<Navbar.Section sx={NAV_LINK_STYLE}>
 									<a href="/api/auth/logout">Logout</a>
 								</Navbar.Section>
-							</Navbar>
-						}>
+							</Navbar>}
+							</> :
+								<Navbar bg="#0d874a" style={{ color: 'white', maxWidth: "250px", minWidth: "100px", width: "15vw", border: "none" }}>
+									<Link href="/">
+										<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "175px", width: "12vw"}}/>
+									</Link>
+									<Space h="2vh" />
+									<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+										<Link href="/dashboard">Dashboard</Link>
+									</Navbar.Section>
+									<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+										<Link href="/application">Application</Link>
+									</Navbar.Section>
+									{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+									<Link href="/team">Team</Link>
+								</Navbar.Section> */}
+									<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
+										<Link href="/admin">Admin</Link>
+									</Navbar.Section>
+									<Navbar.Section sx={NAV_LINK_STYLE}>
+										<a href="/api/auth/logout">Logout</a>
+									</Navbar.Section>
+								</Navbar>
+						}
+						header={
+							mobile ?
+								<Header height={{ base: 50, md: 70 }} p="md" bg="#148648">
+									<div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+										<Burger
+										opened={opened}
+										onClick={toggle}
+										size="sm"
+										mr="xl"
+										color="white"
+										/>
+										<Text color="white" weight="bold">PickHacks 2023</Text>
+									</div>
+								</Header> : <></>
+						}
+						>
 						<UserProvider>
 							<Component {...pageProps} />
 						</UserProvider>
