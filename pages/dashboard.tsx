@@ -24,6 +24,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { calculateRemainingTime } from "../utils/utils";
 import localFont from 'next/font/local';
 import { Merriweather_Sans } from 'next/font/google';
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 
 const WelcomeFont = localFont({ src: './fonts/IntroScript.otf' });
 const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ["300", "400", "700"] });
@@ -80,7 +81,7 @@ const Status: FC<{
 			<Title order={2} inline align="center" color={'white'} weight={"bold"} fz={smol ? 22 : 31} mb={8} className={MerriweatherFont.className}>
 				PickHacks Checklist
 			</Title>
-			<Group bg={applicant.userStatus !== 'Profile Pending' ? "rgba(12, 135, 70, .8)" : "#E84343"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} w="100%" position="center">
+			<Group bg={applicant.userStatus !== 'Profile Pending' ? "rgba(12, 135, 70, .8)" : "#E44E4E"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} w="100%" position="center">
 				{/* <Checkbox
 					readOnly
 					checked
@@ -92,7 +93,7 @@ const Status: FC<{
 					<Link href="/application" style={{color: "white", fontWeight: 300, fontSize: (smol ? "15px" : "18px"), textAlign: "center"}} className={MerriweatherFont.className}>Complete your application</Link>
 				)}
 			</Group>
-			<Group w="100%" bg={(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending') ? "rgba(12, 135, 70, .8)" : "#E84343"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} position="center">
+			<Group w="100%" bg={(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending') ? "rgba(12, 135, 70, .8)" : "#E44E4E"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} position="center">
 				{/* <Checkbox
 					readOnly
 					checked
@@ -101,7 +102,7 @@ const Status: FC<{
 				/> */}
 				<Text color="white" weight={300} className={MerriweatherFont.className} fz={smol ? 15 : 18}>Admitted</Text>
 			</Group>
-			<Group w="100%" bg={(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "#E84343"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
+			<Group w="100%" bg={(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "#E44E4E"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
 				{/* <Checkbox
 					readOnly
 					checked
@@ -118,7 +119,7 @@ const Status: FC<{
 				</Group>
 				)}
 			</Group>
-			<Group w="100%" bg={(applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "#E84343"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
+			<Group w="100%" bg={(applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "#E44E4E"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
 				{/* <Checkbox
 					readOnly
 					checked
@@ -209,7 +210,7 @@ const Dashboard: NextPage = () => {
 	}
 
   return (
-    <MediaQuery query="(min-width: 701px)" styles={{ paddingLeft: "min(250px, 15vw)" }}>
+    <MediaQuery query="(min-width: 701px)" styles={{ paddingLeft: "min(200px, 15vw)" }}>
 		<Flex
 			align="center"
 			direction="column"
@@ -220,8 +221,8 @@ const Dashboard: NextPage = () => {
 					Welcome, {applicant.firstName} {applicant.lastName}!
 				</Title>
 			</Flex>
-			<Flex wrap="wrap" gap={10} p={smol ? 10 : 30} h="100%" w="100%">
-				<Flex direction="column" gap={30} style={{flex: 1, justifyContent: "space-evenly"}}>
+			<Flex wrap="wrap" gap={smol ? 30 : 10} p={smol ? 10 : 30} h="100%" w="100%">
+				<Flex direction="column" gap={smol ? 30 : 15} style={{flex: 1, justifyContent: "space-evenly"}}>
 					<Status
 						applicant={applicant}
 						onConfirm={() => {
@@ -270,60 +271,70 @@ const Dashboard: NextPage = () => {
 					</Flex>
 				</Flex>
 
-				<Flex direction="column" style={{flex: 1, justifyContent: "space-evenly"}}>
+				<Flex direction="column" style={{flex: 1, justifyContent: "space-evenly"}} gap={smol ? 20 : 0}>
 					{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
 					<Flex direction="column" align="center">
 						<Title color="#0C8746" className={MerriweatherFont.className} weight="bold" align="center">PickHacks Calendar</Title>
-						<Image src="/calendar.png" alt="Apr 14 - 16" my={10} style={{maxWidth: "350px", width: "20vw"}}/>
+						<Image src="/calendar.png" alt="Apr 14 - 16" my={10} style={{minWidth: "225px", maxWidth: "350px", width: "20vw"}}/>
 					</Flex>
-					<Flex direction="column" align="center">
-						<Title color="#0C8746" className={MerriweatherFont.className} weight="bold" align="center">PickHacks Countdown</Title>
+					<Flex direction="column" align="center" gap={15}>
+						<Title color="#0C8746" className={MerriweatherFont.className} weight="bold" align="center" inline>PickHacks Countdown</Title>
+						<CountdownCircleTimer
+							isPlaying
+							duration={(new Date(2023, 3, 14, 16).valueOf() - new Date(2023, 2, 20, 16).valueOf()) / 1000}
+							initialRemainingTime={(new Date(2023, 3, 14, 16).valueOf() - Date.now()) / 1000}
+							colors={["#004420", "#004420"]}
+							colorsTime={[(new Date(2023, 3, 14, 16).valueOf() - new Date(2023, 2, 20, 16).valueOf()) / 1000, 0]}
+							strokeLinecap="butt"
+							trailColor="#0C8746"
+							strokeWidth={30}
+						/>
 						{!smol ? (
 							<Flex style={{ color: "rgba(12, 135, 70, .7)", fontFamily: MerriweatherFont.style.fontFamily, fontWeight: 300 }} align="center">
-								<Title size={36} ff="inherit" fw="inherit">{days}</Title>
+								<Title size={36} ff="inherit" fw="bold">{days}</Title>
 								<Title order={2}  ff="inherit" fw="inherit">
 									d
 								</Title>
 								<Title size={36} mx={8} ff="inherit" fw="inherit">
 									:
 								</Title>
-								<Title size={36} ff="inherit" fw="inherit">{hours < 10 ? '0' + hours : hours}</Title>
+								<Title size={36} ff="inherit" fw="bold">{hours < 10 ? '0' + hours : hours}</Title>
 								<Title order={2}  ff="inherit" fw="inherit">
 									h
 								</Title>
 								<Title size={36} mx={8} ff="inherit" fw="inherit">
 									:
 								</Title>
-								<Title size={36} ff="inherit" fw="inherit">{minutes < 10 ? '0' + minutes : minutes}</Title>
+								<Title size={36} ff="inherit" fw="bold">{minutes < 10 ? '0' + minutes : minutes}</Title>
 								<Title order={2} ff="inherit" fw="inherit">
 									m
 								</Title>
 								<Title size={36} mx={8} ff="inherit" fw="inherit">
 									:
 								</Title>
-								<Title size={36} ff="inherit" fw="inherit">{seconds < 10 ? '0' + seconds : seconds}</Title>
+								<Title size={36} ff="inherit" fw="bold">{seconds < 10 ? '0' + seconds : seconds}</Title>
 								<Title order={2} ff="inherit" fw="inherit">
 									s
 								</Title>
 							</Flex>
 						) : (
 							<Flex style={{ color: "rgba(12, 135, 70, .7)", fontFamily: MerriweatherFont.style.fontFamily, fontWeight: 300 }}>
-								<Title ff="inherit" fw="inherit">{days}</Title>
+								<Title ff="inherit" fw="bold">{days}</Title>
 								<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 									d
 								</Title>
 								<Title mx={5} ff="inherit" fw="inherit">:</Title>
-								<Title ff="inherit" fw="inherit">{hours}</Title>
+								<Title ff="inherit" fw="bold">{hours}</Title>
 								<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 									h
 								</Title>
 								<Title mx={5} ff="inherit" fw="inherit">:</Title>
-								<Title ff="inherit" fw="inherit">{minutes}</Title>
+								<Title ff="inherit" fw="bold">{minutes}</Title>
 								<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 									m
 								</Title>
 								<Title mx={5} ff="inherit" fw="inherit">:</Title>
-								<Title ff="inherit" fw="inherit">{seconds}</Title>
+								<Title ff="inherit" fw="bold">{seconds}</Title>
 								<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 									s
 								</Title>
@@ -331,27 +342,67 @@ const Dashboard: NextPage = () => {
 						)}
 					</Flex>
 				</Flex >
-				<Flex direction="column" style={{flex: 1}}>
+				<Flex direction="column" style={{flex: 1, justifyContent: "space-evenly"}} gap={smol ? 10 : 0}>
 					<Flex
 						direction="column"
-						justify="center"
 						align="center"
-						gap={10}
-						px={25}
-						py={20}
+						p={25}
+						bg="rgba(12, 135, 70, .7)"
 						style={{
-							backgroundColor: 'rgba(20, 134, 72, .2)',
-							borderRadius: 15
-						}}>
-						<Title order={2} align="center" color="#148648" inline>
-							PickHacks Date &amp; Location:
+							borderRadius: 45
+						}}
+					>
+						<Title order={2} mb={15} align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight="bold" fz={smol ? 22 : 31}>
+							PickHacks Location
 						</Title>
-						<Title order={2} align="center" inline>
-							April 14th-16th, Gale-Bullman Hall
+						<Title mb={5} align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight={300} fz={smol ? 17 : 23}>
+							Gale-Bullman Hall
 						</Title>
-						<Title order={3} align="center" inline>
+						<Title align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight={300} fz={smol ? 14 : 20}>
 							705 W 10th St, Rolla, MO 65409
 						</Title>
+					</Flex>
+					<Flex
+						direction="column"
+						align="center"
+						p={25}
+						bg="rgba(12, 135, 70, .7)"
+						style={{
+							borderRadius: 45
+						}}
+					>
+						<Title order={2} mb={15} align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight="bold" fz={smol ? 22 : 31}>
+							PickHacks Website
+						</Title>
+						<Anchor href="https://pickhacks.io" color="white" className={MerriweatherFont.className} weight={300} fz={smol ? 17 : 21}>pickhacks.io</Anchor>
+					</Flex>
+					<Flex
+						direction="column"
+						align="center"
+						p={25}
+						bg="rgba(12, 135, 70, .7)"
+						style={{
+							borderRadius: 45
+						}}
+					>
+						<Title order={2} mb={15} align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight="bold" fz={smol ? 22 : 31}>
+							PickHacks Socials
+						</Title>
+						<Anchor href="https://linktr.ee/pickhacks" color="white" className={MerriweatherFont.className} weight={300} fz={smol ? 17 : 21}>https://linktr.ee/pickhacks</Anchor>
+					</Flex>
+					<Flex
+						direction="column"
+						align="center"
+						p={25}
+						bg="rgba(12, 135, 70, .7)"
+						style={{
+							borderRadius: 45
+						}}
+					>
+						<Title order={2} mb={15} align="center" color="white" inline ff={MerriweatherFont.style.fontFamily} weight="bold" fz={smol ? 22 : 31}>
+							PickHacks Discord
+						</Title>
+						<Anchor href="https://pickhacks.io" color="white" className={MerriweatherFont.className} weight={300} fz={smol ? 17 : 21}>discord.gg/K6uwZUcaff</Anchor>
 					</Flex>
 				</Flex>
 			</Flex>

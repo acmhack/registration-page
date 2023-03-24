@@ -320,7 +320,7 @@ const Application: NextPage = () => {
 	}, []);
 
 	return (
-		<div style={{paddingLeft: (mobile ? "0px" : "15vw")}}>
+		<div style={{paddingLeft: (mobile ? "0px" : "min(200px, 15vw)")}}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {

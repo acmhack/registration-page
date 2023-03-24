@@ -88,9 +88,9 @@ export default function App(props: AppProps) {
 					<AppShell padding={0}
 						navbar={
 							mobile ? <>{opened && 
-								<Navbar bg="#0d874a" style={{ color: 'white', width: "100vw", border: "none" }}>
+							<Navbar bg="#0d874a" style={{ color: 'white', width: "100vw", border: "none" }}>
 								<Link href="/">
-									<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "175px", width: "12vw"}}/>
+									<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "100px", width: "20vw"}}/>
 								</Link>
 								<Space h="2vh" />
 								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
@@ -107,9 +107,9 @@ export default function App(props: AppProps) {
 								</Navbar.Section>
 							</Navbar>}
 							</> :
-								<Navbar bg="#0d874a" style={{ color: 'white', maxWidth: "250px", minWidth: "100px", width: "15vw", border: "none" }}>
+								<Navbar bg="#0d874a" style={{ color: 'white', maxWidth: "200px", minWidth: "100px", width: "15vw", border: "none" }}>
 									<Link href="/">
-										<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "175px", width: "12vw"}}/>
+										<Image src="/logo-small.png" alt="Logo" mx="auto" my="lg" style={{maxWidth: "115px", width: "12vw"}}/>
 									</Link>
 									<Space h="2vh" />
 									<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
@@ -131,7 +131,7 @@ export default function App(props: AppProps) {
 						}
 						header={
 							mobile ?
-								<Header height={{ base: 50, md: 70 }} p="md" bg="#148648">
+								<Header height={{ base: 50, md: 70 }} p="md" bg="#148648" sx={{border: "none"}}>
 									<div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
 										<Burger
 										opened={opened}

@@ -147,7 +147,7 @@ const Admin: NextPage = () => {
 	}, []);
 
 	return (
-		<div style={{paddingLeft: (mobile ? "0px" : "15vw"), margin: "10px"}}>
+		<div style={{paddingLeft: (mobile ? "0px" : "min(200px, 15vw)"), margin: "10px"}}>
 			<Title>Admin Panel</Title>
 			<Grid align="center" gutter="xs" my="md">
 				<Grid.Col xs={8} sm={9}>
