@@ -1,14 +1,33 @@
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import { Anchor, Button, Checkbox, CheckboxProps, Flex, Group, Loader, MediaQuery, Stack, Switch, Text, Title } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
-import axios, { AxiosError } from 'axios';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { NextPage } from 'next/types';
+import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import {
+  Anchor,
+  Button,
+  Checkbox,
+  CheckboxProps,
+  Group,
+  Stack,
+  Switch,
+  Text,
+  Title,
+  Flex,
+  MediaQuery,
+  Image,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import axios, { AxiosError } from "axios";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { NextPage } from "next/types";
 import { FC, useCallback, useEffect, useState } from 'react';
-import { calculateRemainingTime } from '../utils/utils';
+import { calculateRemainingTime } from "../utils/utils";
+import localFont from 'next/font/local';
+import { Merriweather_Sans } from 'next/font/google';
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
+
+const WelcomeFont = localFont({ src: './fonts/IntroScript.otf' });
+const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ["300", "400", "700"] });
 
 interface Applicant {
 	firstName: string;
@@ -36,8 +55,9 @@ interface Applicant {
 	mlhAgreement: boolean;
 }
 
+
 function makeIcon(checked: boolean): CheckboxProps['icon'] {
-	const CheckboxIcon: CheckboxProps['icon'] = ({ className }) => (checked ? <IconCheck className={className} /> : <IconX className={className} />);
+	const CheckboxIcon: CheckboxProps['icon'] = ({ className }) => (checked ? <IconCheck className={className}/> : <IconX className={className} />);
 
 	return CheckboxIcon;
 }
@@ -46,78 +66,64 @@ const Status: FC<{
 	applicant: Applicant;
 	onConfirm: () => void;
 	confirming: boolean;
-}> = ({ applicant, onConfirm, confirming }) => {
+	smol: boolean;
+}> = ({ applicant, onConfirm, confirming, smol }) => {
 	return (
 		<Stack
-			spacing={10}
-			p={25}
-			justify="center"
-			style={{
-				backgroundColor: 'rgba(20, 134, 72, .2)',
-				borderRadius: 15
-			}}>
-			<Title order={2} inline align="center" color={'#148648'}>
-				PickHacks Checklist:
+			justify="space-between"
+			align="center"
+			w={302}
+		>
+			<Title order={2} inline align="center" color={'white'} weight={"bold"} fz={smol ? 22 : 31} mb={8} className={MerriweatherFont.className}>
+				PickHacks Checklist
 			</Title>
-			<Stack spacing={6} ml="lg">
-				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
-					<Group>
-						<Checkbox
-							readOnly
-							checked
-							icon={makeIcon(applicant.userStatus !== 'Profile Pending')}
-							color={applicant.userStatus !== 'Profile Pending' ? 'green' : 'red'}
-						/>
-						<Text>Profile Completed</Text>
-					</Group>
-					{applicant.userStatus === 'Profile Pending' && (
-						<Text weight="bold">
-							Complete your application in the <Link href="/application">application tab</Link>
-						</Text>
-					)}
-				</Group>
+			<Group bg={applicant.userStatus !== 'Profile Pending' ? "rgba(12, 135, 70, .8)" : "#1B5A7F"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} w="100%" position="center">
+				{/* <Checkbox
+					readOnly
+					checked
+					icon={makeIcon(applicant.userStatus !== 'Profile Pending')}
+					color={applicant.userStatus !== 'Profile Pending' ? 'green' : 'red'}
+				/> */}
+				{applicant.userStatus !== 'Profile Pending' && <Text color="white" weight="bold" className={MerriweatherFont.className} fz={smol ? 15 : 18}>Profile Completed</Text>}
+				{(applicant.userStatus === 'Profile Pending' &&
+					<Link href="/application" style={{color: "white", fontWeight: "bold", fontSize: (smol ? "15px" : "18px"), textAlign: "center"}} className={MerriweatherFont.className}>Complete your application</Link>
+				)}
+			</Group>
+			<Group w="100%" bg={(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending') ? "rgba(12, 135, 70, .8)" : "rgba(27, 90, 127, .4)"} style={{ borderRadius: 45 }} p={smol ? 15 : 22} position="center">
+				{/* <Checkbox
+					readOnly
+					checked
+					icon={makeIcon(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending')}
+					color={applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending' ? 'green' : 'red'}
+				/> */}
+				<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18}>Admitted</Text>
+			</Group>
+			<Group w="100%" bg={(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "rgba(27, 90, 127, .4)"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
+				{/* <Checkbox
+					readOnly
+					checked
+					icon={makeIcon(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In')}
+					color={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+				/> */}
+				{applicant.userStatus !== 'Confirmation Pending' && <Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18}>Confirmed</Text>}
+				{applicant.userStatus === 'Confirmation Pending' && (
 				<Group>
-					<Checkbox
-						readOnly
-						checked
-						icon={makeIcon(applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending')}
-						color={applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending' ? 'green' : 'red'}
-					/>
-					<Text>Admitted</Text>
+					<Button compact loading={confirming} onClick={onConfirm}>
+						I will attend!
+					</Button>
+					<Text className={MerriweatherFont.className} fz={smol ? 15 : 18} color="white">Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
 				</Group>
-				<Group maw={640} sx={{ justifyContent: 'space-between' }}>
-					<Group>
-						<Checkbox
-							readOnly
-							checked
-							icon={makeIcon(applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In')}
-							color={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'green' : 'red'}
-						/>
-						<Text>Confirmed</Text>
-					</Group>
-					{applicant.userStatus === 'Confirmation Pending' && (
-						<Group>
-							<Button compact loading={confirming} onClick={onConfirm}>
-								I will attend!
-							</Button>
-							<Text weight="bold">Confirmation Deadline: {new Date(2023, 3, 9).toLocaleDateString()}</Text>
-						</Group>
-					)}
-				</Group>
-				<Group>
-					<Checkbox
-						readOnly
-						checked
-						icon={makeIcon(applicant.userStatus === 'Checked In')}
-						color={applicant.userStatus === 'Checked In' ? 'green' : 'red'}
-					/>
-					<Text>Checked In</Text>
-				</Group>
-				<Text>
-					For additional information, see the <Anchor href="https://pickhacks.io">the main pickhacks page</Anchor> and{' '}
-					<Anchor href="https://discord.gg/K6uwZUcaff">join our discord</Anchor> to keep in touch!
-				</Text>
-			</Stack>
+				)}
+			</Group>
+			<Group w="100%" bg={(applicant.userStatus === 'Checked In') ? "rgba(12, 135, 70, .8)" : "rgba(27, 90, 127, .4)"} style={{ borderRadius: 45}} p={smol ? 15 : 22} position="center">
+				{/* <Checkbox
+					readOnly
+					checked
+					icon={makeIcon(applicant.userStatus === 'Checked In')}
+					color={applicant.userStatus === 'Checked In' ? 'green' : 'red'}
+				/> */}
+				<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18}>Checked In</Text>
+			</Group>
 		</Stack>
 	);
 };
@@ -125,16 +131,15 @@ const Status: FC<{
 const Dashboard: NextPage = () => {
 	const { user, isLoading } = useUser();
 	const router = useRouter();
-	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
-	const smol = useMediaQuery('screen and (max-width: 1000px)');
-	const [applicant, setApplicant] = useState<Applicant | null>(null);
 	const [confirming, setConfirming] = useState<boolean>(false);
 	const [lft, setLFT] = useState<boolean>(false);
 	const [togglingLFT, setTogglingLFT] = useState<boolean>(false);
+	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
+	const [applicant, setApplicant] = useState<Applicant | null>(null);
+	const smol = useMediaQuery("screen and (max-width: 700px)");
 
 	const toggleLFT = useCallback(() => {
 		setTogglingLFT(true);
-
 		axios
 			.post('/api/lft')
 			.then(() => {
@@ -172,15 +177,21 @@ const Dashboard: NextPage = () => {
 		};
 	}, []);
 
-	if (!applicant) {
-		return (
-			<MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: '100px' }}>
-				<Flex justify="center" align="center" direction="column" gap={40} style={{ height: '100%' }}>
-					<Title>Loading...</Title>
-				</Flex>
-			</MediaQuery>
-		);
-	}
+
+  if (!applicant) {
+    return (
+			<Flex
+			justify="center"
+			align="center"
+			direction="column"
+			gap={40}
+			style={{ height: "100%" }}
+			>
+				<Title color="white">Loading...</Title>
+			</Flex>
+    );
+  }
+  
 
 	if (applicant.userStatus === 'Denied') {
 		return (
@@ -190,177 +201,177 @@ const Dashboard: NextPage = () => {
 		);
 	}
 
-	return (
-		<MediaQuery query="(max-width: 1300px)" styles={{ paddingLeft: '100px' }}>
-			<Flex justify="center" align="center" direction="column" gap={40} style={{ height: '100%' }}>
-				<MediaQuery query="(max-width: 1100px)" styles={{ flexDirection: 'column' }}>
-					<Flex mt={20}>
-						<Title inline align="center">
-							Welcome,&nbsp;
-						</Title>
-						<Title inline align="center">
-							{applicant.firstName} {applicant.lastName}!
-						</Title>
-					</Flex>
-				</MediaQuery>
-				<Status
-					applicant={applicant}
-					onConfirm={() => {
-						axios
-							.post('/api/confirm')
+  return (
+    <MediaQuery query="(min-width: 701px)" styles={{ paddingLeft: "min(200px, 15vw)" }}>
+		<Flex
+			align="center"
+			direction="column"
+			style={{ height: "100%" }}
+		>
+			<Flex w="100%" bg="rgba(32, 191, 177, .1)" justify={"center"} px={15} py={25}>
+				<Title size={smol ? 40 : 60} inline align="center" className={WelcomeFont.className} color="#0C8746" style={{filter: "drop-shadow(2px 3px rgba(12, 135, 70, .4))", fontWeight: "normal"}}>
+					Welcome, {applicant.firstName} {applicant.lastName}!
+				</Title>
+			</Flex>
+			<Flex wrap="wrap" gap={smol ? 30 : 10} px={smol ? 10 : 30} h="100%" w="100%" my={"auto"} py={10} align="center" justify="center">
+				<Flex direction="column" gap={smol ? 30 : 50} align="center" style={{flex: 1, justifyContent: "space-between", borderRadius: 45,}} bg="rgba(12, 135, 70, .7)" w={"100%"} maw={600} miw={350} h={smol ? 500 : 700} px={25} py={smol ? 35 : 55}>
+					<Status
+						applicant={applicant}
+						onConfirm={() => {
+							axios
+							.post("/api/confirm")
 							.then((res) => {
-								setConfirming(false);
-								setApplicant(res.data);
+							setConfirming(false);
+							setApplicant(res.data);
 							})
 							.catch((err: AxiosError) => {
 								if (err.response) {
 									console.log(err.response);
 									notifications.show({
-										message: err.response.data as string,
-										title: 'Something went wrong...',
-										autoClose: 5000,
-										color: 'red'
+									message: err.response.data as string,
+									title: "Something went wrong...",
+									autoClose: 5000,
+									color: "red",
 									});
 								}
-
 								setConfirming(false);
 							});
-						setConfirming(true);
-					}}
-					confirming={confirming}
-				/>
-				<Flex
-					direction="column"
-					justify="center"
-					align="center"
-					gap={10}
-					px={25}
-					py={20}
-					style={{
-						backgroundColor: 'rgba(20, 134, 72, .2)',
-						borderRadius: 15
-					}}>
-					<Title order={2} align="center" inline color={'#148648'}>
-						Team Status
-					</Title>
-					<Group position="center" noWrap>
-						<Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft} />
-						{lft ? (
-							<Text inline style={{ whiteSpace: 'nowrap' }}>
+							setConfirming(true);
+						}}
+						confirming={confirming}
+						smol={smol}
+					/>
+					
+					<Stack
+						justify="space-between"
+						align="center"
+						w={302}
+					>
+						<Title order={2} align="center" inline color="white" weight="bold" ff={MerriweatherFont.style.fontFamily} fz={smol ? 22 : 31} px={30}>
+							Team Status
+						</Title>
+						<Group position="center" noWrap bg="rgba(12, 135, 70, .8)" w={302} p={smol ? 15 : 22} align="center" style={{borderRadius: 45}}>
+							<Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft} color={"cyan.9"} />
+							<Text color="white" className={MerriweatherFont.className} weight={"bold"} style={{ whiteSpace: 'nowrap' }} fz={smol ? 15 : 18}>
 								Looking for a team
 							</Text>
-						) : (
-							<Text inline>Not looking for a team</Text>
-						)}
-						{togglingLFT && <Loader size="sm" />}
-					</Group>
+						</Group>
+					</Stack>
 				</Flex>
-				{applicant.attendingPrehacks && <Title order={4}>Prehacks Date: April 6th</Title>}
-				<Flex
-					direction="column"
-					justify="center"
-					align="center"
-					gap={10}
-					px={25}
-					py={20}
-					style={{
-						backgroundColor: 'rgba(20, 134, 72, .2)',
-						borderRadius: 15
-					}}>
-					<Title order={2} align="center" color="#148648" inline>
-						PickHacks Date &amp; Location:
-					</Title>
-					<Title order={2} align="center" inline>
-						April 14th-16th, Gale-Bullman Hall
-					</Title>
-					<Title order={3} align="center" inline>
-						705 W 10th St, Rolla, MO 65409
-					</Title>
-				</Flex>
-				{!smol ? (
-					<Group
-						spacing={0}
-						align="center"
-						position="center"
-						px={25}
-						py={20}
-						style={{
-							backgroundColor: 'rgba(20, 134, 72, .2)',
-							borderRadius: 15,
-							flexDirection: 'column',
-							gap: 10
-						}}>
-						<Title order={2} mr={16} inline style={{ color: '#148648' }}>
-							PickHacks Countdown:
-						</Title>
-						<Flex>
-							<Title size={36}>{days}</Title>
-							<Title order={2} style={{ alignSelf: 'flex-end' }}>
+
+				<Flex direction="column" style={{flex: 1 }} gap={20} maw={600} h={smol ? 650 : 700} miw={350} justify="space-between" align="center">
+					<Title color="#0C8746" className={MerriweatherFont.className} weight="bold" align="center">PickHacks Countdown</Title>
+					<Image src="/calendar.png" alt="Apr 14 - 16" my={10} style={{minWidth: "225px", maxWidth: "300px", width: "18vw"}}/>
+					<CountdownCircleTimer
+						isPlaying
+						duration={(new Date(2023, 3, 14, 16).valueOf() - new Date(2023, 2, 20, 16).valueOf()) / 1000}
+						initialRemainingTime={(new Date(2023, 3, 14, 16).valueOf() - Date.now()) / 1000}
+						colors={["#004420", "#004420"]}
+						colorsTime={[(new Date(2023, 3, 14, 16).valueOf() - new Date(2023, 2, 20, 16).valueOf()) / 1000, 0]}
+						strokeLinecap="butt"
+						trailColor="#0C8746"
+						strokeWidth={30}
+					/>
+					{!smol ? (
+						<Flex style={{ color: "rgba(12, 135, 70, .7)", fontFamily: MerriweatherFont.style.fontFamily, fontWeight: "bold" }} align="center">
+							<Title size={45} ff="inherit" fw="bold">{days}</Title>
+							<Title order={2} mt={10} ff="inherit" fw="inherit">
 								d
 							</Title>
-							<Title size={36} mx={8}>
+							<Title size={45} mx={5} ff="inherit" fw="inherit">
 								:
 							</Title>
-							<Title size={36}>{hours < 10 ? '0' + hours : hours}</Title>
-							<Title order={2} style={{ alignSelf: 'flex-end' }}>
+							<Title size={45} ff="inherit" fw="bold">{hours < 10 ? '0' + hours : hours}</Title>
+							<Title order={2} mt={10} ff="inherit" fw="inherit">
 								h
 							</Title>
-							<Title size={36} mx={8}>
+							<Title size={45} mx={5} ff="inherit" fw="inherit">
 								:
 							</Title>
-							<Title size={36}>{minutes < 10 ? '0' + minutes : minutes}</Title>
-							<Title order={2} style={{ alignSelf: 'flex-end' }}>
+							<Title size={45} ff="inherit" fw="bold">{minutes < 10 ? '0' + minutes : minutes}</Title>
+							<Title order={2} mt={10} ff="inherit" fw="inherit">
 								m
 							</Title>
-							<Title size={36} mx={8}>
+							<Title size={45} mx={5} ff="inherit" fw="inherit">
 								:
 							</Title>
-							<Title size={36}>{seconds < 10 ? '0' + seconds : seconds}</Title>
-							<Title order={2} style={{ alignSelf: 'flex-end' }}>
+							<Title size={45} ff="inherit" fw="bold">{seconds < 10 ? '0' + seconds : seconds}</Title>
+							<Title order={2} mt={10} ff="inherit" fw="inherit">
 								s
 							</Title>
 						</Flex>
-					</Group>
-				) : (
-					<Group
-						spacing={0}
-						align="center"
-						position="center"
-						p={20}
-						style={{
-							backgroundColor: 'rgba(20, 134, 72, .2)',
-							borderRadius: 15,
-							flexDirection: 'column',
-							gap: 10
-						}}>
-						<Title order={2} align="center" inline style={{ color: '#148648' }}>
-							PickHacks Countdown:{' '}
-						</Title>
-						<div style={{ display: 'flex' }}>
-							<Title>{days}</Title>
-							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }}>
+					) : (
+						<Flex style={{ color: "rgba(12, 135, 70, .7)", fontFamily: MerriweatherFont.style.fontFamily, fontWeight: "bold" }}>
+							<Title ff="inherit" fw="bold">{days}</Title>
+							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 								d
 							</Title>
-							<Title mx={5}>:</Title>
-							<Title>{hours}</Title>
-							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }}>
+							<Title mx={5} ff="inherit" fw="inherit">:</Title>
+							<Title ff="inherit" fw="bold">{hours}</Title>
+							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 								h
 							</Title>
-							<Title mx={5}>:</Title>
-							<Title>{minutes}</Title>
-							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }}>
+							<Title mx={5} ff="inherit" fw="inherit">:</Title>
+							<Title ff="inherit" fw="bold">{minutes}</Title>
+							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 								m
 							</Title>
-							<Title mx={5}>:</Title>
-							<Title>{seconds}</Title>
-							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }}>
+							<Title mx={5} ff="inherit" fw="inherit">:</Title>
+							<Title ff="inherit" fw="bold">{seconds}</Title>
+							<Title size="sm" mb={5} style={{ alignSelf: 'flex-end' }} ff="inherit" fw="inherit">
 								s
 							</Title>
-						</div>
-					</Group>
-				)}
+						</Flex>
+					)}
+				</Flex >
+				<Flex direction="column" justify="space-between" align="center" px={25} py={smol ? 35 : 55} bg="rgba(12, 135, 70, .7)" w={"100%"} maw={600} h={smol ? 500 : 700} miw={350} style={{flex: 1, borderRadius: 45,}} gap={10}>
+						<Stack
+							justify="space-between"
+							align="center"
+							w={302}
+						>
+							<Title order={2} inline align="center" color={'white'} weight={"bold"} fz={smol ? 22 : 31} mb={8} className={MerriweatherFont.className}>
+								PickHacks Links
+							</Title>
+							<Anchor href="https://goo.gl/maps/KgLMuRjvQqJCcHjU6" target="_blank" w={"100%"} bg="rgba(12, 135, 70, .8)" p={smol ? 15 : 22} style={{borderRadius: 45}}>
+								<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18} align="center">
+									PickHacks Location
+								</Text>
+							</Anchor>
+							<Anchor href="https://pickhacks.io" target="_blank" w={"100%"} bg="rgba(12, 135, 70, .8)" p={smol ? 15 : 22} style={{borderRadius: 45}}>
+								<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18} align="center">
+									PickHacks Website
+								</Text>
+							</Anchor>
+							<Anchor href="https://linktr.ee/pickhacks" target="_blank" w={"100%"} bg="rgba(12, 135, 70, .8)" p={smol ? 15 : 22} style={{borderRadius: 45}}>
+								<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18} align="center">
+									PickHacks Socials
+								</Text>
+							</Anchor>
+							<Anchor href="https://discord.gg/K6uwZUcaff" target="_blank" w={"100%"} bg="rgba(12, 135, 70, .8)" p={smol ? 15 : 22} style={{borderRadius: 45}}>
+								<Text color="white" weight={"bold"} className={MerriweatherFont.className} fz={smol ? 15 : 18} align="center">
+									PickHacks Discord
+								</Text>
+							</Anchor>
+						</Stack>
+						<Stack
+							justify="space-between"
+							align="center"
+							w={302}
+						>
+							<Title order={2} align="center" inline color="white" weight="bold" ff={MerriweatherFont.style.fontFamily} fz={smol ? 22 : 31} px={30}>
+								PreHacks Info
+							</Title>
+							<Group position="center" noWrap bg="rgba(12, 135, 70, .8)" w={302} p={smol ? 15 : 22} align="center" style={{borderRadius: 45}}>
+								<Text color="white" className={MerriweatherFont.className} weight={"bold"} style={{ whiteSpace: 'nowrap' }} fz={smol ? 15 : 18}>
+									Date and time TBA
+								</Text>
+							</Group>
+						</Stack>
+				</Flex>
 			</Flex>
-		</MediaQuery>
+		</Flex>
+	</MediaQuery>
 	);
 };
 
