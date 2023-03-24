@@ -6,6 +6,9 @@ import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import Link from 'next/link';
+import { Merriweather_Sans } from 'next/font/google';
+
+const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ["300", "400", "700"] });
 
 const NAV_LINK_STYLE: CSSObject = {
 	// borderTop: '2px solid rgba(210, 80, 110, 0.5)',
@@ -85,7 +88,8 @@ export default function App(props: AppProps) {
 				}}>
 				<Notifications position="top-right" />
 				<ModalsProvider>
-					<AppShell padding={0}
+					<AppShell 
+						padding={0}
 						navbar={
 							mobile ? <>{opened && 
 							<Navbar bg="#0d874a" style={{ color: 'white', width: "100vw", border: "none" }}>
@@ -94,16 +98,16 @@ export default function App(props: AppProps) {
 								</Link>
 								<Space h="2vh" />
 								<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/dashboard" onClick={toggle}>Dashboard</Link>
+									<Link href="/dashboard" onClick={toggle} className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Dashboard</Link>
 								</Navbar.Section>
 								<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/application" onClick={toggle}>Application</Link>
+									<Link href="/application" onClick={toggle} className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Application</Link>
 								</Navbar.Section>
 								<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/admin" onClick={toggle}>Admin</Link>
+									<Link href="/admin" onClick={toggle} className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Admin</Link>
 								</Navbar.Section>
 								<Navbar.Section sx={NAV_LINK_STYLE}>
-									<a href="/api/auth/logout" onClick={toggle}>Logout</a>
+									<a href="/api/auth/logout" onClick={toggle} className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Logout</a>
 								</Navbar.Section>
 							</Navbar>}
 							</> :
@@ -113,19 +117,19 @@ export default function App(props: AppProps) {
 									</Link>
 									<Space h="2vh" />
 									<Navbar.Section className={router.route === '/dashboard' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-										<Link href="/dashboard">Dashboard</Link>
+										<Link href="/dashboard" className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Dashboard</Link>
 									</Navbar.Section>
 									<Navbar.Section className={router.route === '/application' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-										<Link href="/application">Application</Link>
+										<Link href="/application" className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Application</Link>
 									</Navbar.Section>
 									{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
 									<Link href="/team">Team</Link>
 								</Navbar.Section> */}
 									<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-										<Link href="/admin">Admin</Link>
+										<Link href="/admin" className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Admin</Link>
 									</Navbar.Section>
 									<Navbar.Section sx={NAV_LINK_STYLE}>
-										<a href="/api/auth/logout">Logout</a>
+										<a href="/api/auth/logout" className={MerriweatherFont.className} style={{fontWeight: "bold"}}>Logout</a>
 									</Navbar.Section>
 								</Navbar>
 						}
@@ -140,7 +144,7 @@ export default function App(props: AppProps) {
 										mr="xl"
 										color="white"
 										/>
-										<Text color="white" weight="bold">PickHacks 2023</Text>
+										<Text color="white" className={MerriweatherFont.className} weight="bold">PickHacks 2023</Text>
 									</div>
 								</Header> : <></>
 						}
