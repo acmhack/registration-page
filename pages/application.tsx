@@ -16,13 +16,13 @@ import {
 	Tooltip
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconQuestionMark } from '@tabler/icons-react';
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { useEffect, useState } from 'react';
-import { useMediaQuery } from '@mantine/hooks';
 
 interface FormValues {
 	firstName: string;
@@ -309,7 +309,7 @@ const Application: NextPage = () => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
-	const mobile = useMediaQuery("screen and (max-width: 700px)");
+	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
 	useEffect(() => {
 		axios.get<Applicant>('/api/me').then((res) => {
@@ -320,7 +320,7 @@ const Application: NextPage = () => {
 	}, []);
 
 	return (
-		<div style={{paddingLeft: (mobile ? "0px" : "min(200px, 15vw)")}}>
+		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
@@ -512,6 +512,9 @@ const Application: NextPage = () => {
 											{...form.getInputProps('resume')}
 											placeholder="Submit resume"
 											accept="application/pdf"
+											descriptionProps={{
+												style: { color: 'black' }
+											}}
 										/>
 										<TextInput label="LinkedIn" {...form.getInputProps('linkedin')} />
 										<TextInput label="GitHub" {...form.getInputProps('github')} />
