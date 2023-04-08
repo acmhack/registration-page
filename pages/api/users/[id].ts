@@ -22,7 +22,7 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			const user = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
 			const data: DBEntry = req.body;
 
-			if (user.admin && data.id === req.query.id) {
+			if (user.admin || data.id === req.query.id) {
 				try {
 					const response = await axios.put(process.env.API_URL!, data);
 					return res.status(200).json(response.data);
