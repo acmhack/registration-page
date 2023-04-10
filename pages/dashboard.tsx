@@ -102,9 +102,6 @@ const Status: FC<{
 						<Button compact loading={confirming} onClick={onConfirm}>
 							I will attend!
 						</Button>
-						<Text className={MerriweatherFont.className} fz={smol ? 15 : 18} color="white">
-							Deadline: {new Date(2023, 3, 9).toLocaleDateString()}
-						</Text>
 					</Group>
 				)}
 			</Group>
