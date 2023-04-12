@@ -74,7 +74,7 @@ const Admin: NextPage = () => {
 	const [fetching, setFetching] = useState(false);
 	const [readyForReview, setReadyForReviewOnly] = useState(false);
 	const [updating, setUpdating] = useState<boolean>(false);
-	const mobile = useMediaQuery("screen and (max-width: 700px)");
+	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
 	useEffect(() => {
 		const filteredRecords = initialRecords.filter((user: DBEntry) => {
@@ -147,7 +147,7 @@ const Admin: NextPage = () => {
 	}, []);
 
 	return (
-		<div style={{paddingLeft: (mobile ? "0px" : "min(200px, 15vw)"), margin: "10px"}}>
+		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)', margin: '10px' }}>
 			<Title>Admin Panel</Title>
 			<Grid align="center" gutter="xs" my="md">
 				<Grid.Col xs={8} sm={9}>
