@@ -22,7 +22,8 @@ import { IconQuestionMark } from '@tabler/icons-react';
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { client } from '../utils/fs';
 
 interface FormValues {
 	firstName: string;
@@ -311,13 +312,13 @@ const Application: NextPage = () => {
 	const router = useRouter();
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
-	useEffect(() => {
-		axios.get<Applicant>('/api/me').then((res) => {
-			if (res.data.userStatus !== 'Profile Pending') {
-				setDisabled(true);
-			}
-		});
-	}, []);
+	// useEffect(() => {
+	// 	axios.get<Applicant>('/api/me').then((res) => {
+	// 		if (res.data.userStatus !== 'Profile Pending') {
+	// 			setDisabled(true);
+	// 		}
+	// 	});
+	// }, []);
 
 	return (
 		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
@@ -344,30 +345,44 @@ const Application: NextPage = () => {
 								const id: string = 'submitting-notification';
 								let expired: boolean = false;
 
-								axios
-									.post('/api/users', applicationData)
-									.then(() => {
-										router.replace('/dashboard');
+								// axios
+								// 	.post('/api/users', applicationData)
+								// 	.then(() => {
+								// 		router.replace('/dashboard');
 
-										if (!expired) {
-											notifications.hide(id);
-										}
-									})
-									.catch((err: AxiosError) => {
-										if (err.response) {
-											console.log(err.response.data);
-											notifications.show({
-												message: err.response.data as string,
-												title: 'Something went wrong...',
-												autoClose: 5000,
-												color: 'red'
-											});
+								// 		if (!expired) {
+								// 			notifications.hide(id);
+								// 		}
+								// 	})
+								// 	.catch((err: AxiosError) => {
+								// 		if (err.response) {
+								// 			console.log(err.response.data);
+								// 			notifications.show({
+								// 				message: err.response.data as string,
+								// 				title: 'Something went wrong...',
+								// 				autoClose: 5000,
+								// 				color: 'red'
+								// 			});
 
-											if (!expired) {
-												notifications.hide(id);
-											}
-										}
-									});
+								// 			if (!expired) {
+								// 				notifications.hide(id);
+								// 			}
+								// 		}
+								// 	});
+								client.upload(form.values.resume!).then((res) => {
+									console.log(res);
+
+									// notifications.show({
+									// 	message: err.response.data as string,
+									// 	title: 'Something went wrong...',
+									// 	autoClose: 5000,
+									// 	color: 'red'
+									// });
+
+									if (!expired) {
+										notifications.hide(id);
+									}
+								});
 
 								notifications.show({
 									id,
