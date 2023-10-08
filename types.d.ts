@@ -1,6 +1,12 @@
-type UserStatus = 'Profile Pending' | 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Confirmed' | 'Checked In'
+type UserStatus = 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Confirmed' | 'Checked In';
 
-interface JSONFormValues {
+interface Application extends ApplicationData {
+	_id: import('mongodb').ObjectId;
+	status: UserStatus;
+	admin: boolean;
+}
+
+interface ApplicationData {
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -23,32 +29,6 @@ interface JSONFormValues {
 	codeOfConductAgreement: boolean;
 	dataAgreement: boolean;
 	mlhAgreement: boolean;
-}
-
-interface DBEntry {
-	id: string;
-	admin: boolean;
-	userstatus: UserStatus;
-	firstname: string;
-	lastname: string;
-	email: string;
-	age: string;
-	phone: string;
-	country: string;
-	school: string;
-	levelofstudy: string;
-	gradyear: string;
-	gradmonth: string;
-	shirtsize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
-	resume: string | null; //base64
-	diet: string;
-	experience: string;
-	links: string;
-	prehacks: boolean;
-	lft: boolean;
-	mlhcodeofconduct: boolean;
-	mlhcommunication: boolean;
-	mlhlogistics: boolean;
 }
 
 interface Applicant {

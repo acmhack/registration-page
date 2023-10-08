@@ -1,14 +1,14 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios, { isAxiosError } from 'axios';
+import axios from 'axios';
+import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const session = await getSession(req, res);
-	const id = session!.user.sub;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+	console.log(req.cookies);
+	const id = '';
 
 	switch (req.method) {
 		case 'GET': {
-			const user = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
+			const user = (await axios.get<Application>(`${process.env.API_URL}/${id}`)).data;
 
 			if (user.admin) {
 				const response = await axios.get(process.env.API_URL!);
@@ -19,84 +19,25 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 			}
 		}
 		case 'POST': {
-			const {
-				firstName,
-				lastName,
-				email,
-				age,
-				phoneNumber,
-				country,
-				school,
-				levelOfStudy,
-				graduationMonth,
-				graduationYear,
-				shirtSize,
-				dietRestrictions,
-				hackathonCount,
-				resume,
-				linkedin,
-				github,
-				otherSites,
-				attendingPrehacks,
-				lookingForTeam,
-				codeOfConductAgreement,
-				dataAgreement,
-				mlhAgreement
-			} = req.body as JSONFormValues;
-
-			const data: DBEntry = {
-				id,
-				admin: false,
-				userstatus: 'Admission Pending',
-				firstname: firstName,
-				lastname: lastName,
-				email,
-				age,
-				phone: phoneNumber,
-				country,
-				school,
-				levelofstudy: levelOfStudy,
-				gradyear: graduationYear,
-				gradmonth: graduationMonth,
-				shirtsize: shirtSize,
-				resume,
-				diet: JSON.stringify(dietRestrictions),
-				experience: hackathonCount,
-				links: JSON.stringify([linkedin, github, ...otherSites]),
-				prehacks: attendingPrehacks,
-				lft: lookingForTeam,
-				mlhcodeofconduct: codeOfConductAgreement,
-				mlhcommunication: dataAgreement,
-				mlhlogistics: mlhAgreement
-			};
+			const data = req.body as Omit<Application, 'status'>;
 
 			try {
-				const response = await axios.put(process.env.API_URL!, data);
+				const client = await MongoClient.connect(process.env.MONGODB_URL!);
+				const collection = client.db(process.env.STAGE === 'prod' ? 'main' : 'test').collection<Application>('applications');
 
-				return res.status(200).json(response.data);
-			} catch (err: unknown) {
-				if (isAxiosError(err)) {
-					if (err.response) {
-						if (
-							err.status === 400 &&
-							typeof err.response.data === 'string' &&
-							err.response.data.includes('throughput for the table was exceeded')
-						) {
-							return res.status(502).send("DB is overloaded at the moment, please try again in a bit (don't close the tab).");
-						} else {
-							console.log(err.response);
-						}
-					} else {
-						console.log(err);
-					}
+				const application: Application = { ...data, status: 'Admission Pending' };
+				const result = await collection.insertOne(application);
 
-					return res.status(500).send('An unknown error occured');
+				if (result.acknowledged) {
+					return res.status(201).json(application);
 				} else {
-					console.log(err);
-					return res.status(500).send('An unknown error occured');
+					return res.status(500).send('Failed to insert new application');
 				}
+			} catch (err: unknown) {
+				console.log(err);
+				return res.status(500).send('An unknown error occured');
 			}
 		}
 	}
-});
+};
 

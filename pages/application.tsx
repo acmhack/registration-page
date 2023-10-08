@@ -23,7 +23,6 @@ import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { useState } from 'react';
-import { client } from '../utils/fs';
 
 interface FormValues {
 	firstName: string;
@@ -330,72 +329,55 @@ const Application: NextPage = () => {
 						}
 
 						if (form.values.resume) {
-							const reader = new FileReader();
+							const id: string = 'submitting-notification';
+							let expired: boolean = false;
 
-							reader.onloadend = () => {
-								const resultString = reader.result as string;
-								const resume = resultString.slice(resultString.indexOf(',') + 1);
+							const data = new FormData();
+							data.append('resume', form.values.resume!);
+							axios.post<{ url: string }>('/api/resume', data).then((res) => {
+								const resumeURL = res.data.url;
 
 								const applicationData = {
 									...values,
 									graduationYear: values.graduationYear.toString(),
-									resume
+									resume: resumeURL
 								};
 
-								const id: string = 'submitting-notification';
-								let expired: boolean = false;
+								axios
+									.post('/api/users', applicationData)
+									.then(() => {
+										router.replace('/dashboard');
 
-								// axios
-								// 	.post('/api/users', applicationData)
-								// 	.then(() => {
-								// 		router.replace('/dashboard');
+										if (!expired) {
+											notifications.hide(id);
+										}
+									})
+									.catch((err: AxiosError) => {
+										if (err.response) {
+											console.log(err.response.data);
+											notifications.show({
+												message: err.response.data as string,
+												title: 'Something went wrong...',
+												autoClose: 5000,
+												color: 'red'
+											});
 
-								// 		if (!expired) {
-								// 			notifications.hide(id);
-								// 		}
-								// 	})
-								// 	.catch((err: AxiosError) => {
-								// 		if (err.response) {
-								// 			console.log(err.response.data);
-								// 			notifications.show({
-								// 				message: err.response.data as string,
-								// 				title: 'Something went wrong...',
-								// 				autoClose: 5000,
-								// 				color: 'red'
-								// 			});
+											if (!expired) {
+												notifications.hide(id);
+											}
+										}
+									});
+							});
 
-								// 			if (!expired) {
-								// 				notifications.hide(id);
-								// 			}
-								// 		}
-								// 	});
-								client.upload(form.values.resume!).then((res) => {
-									console.log(res);
-
-									// notifications.show({
-									// 	message: err.response.data as string,
-									// 	title: 'Something went wrong...',
-									// 	autoClose: 5000,
-									// 	color: 'red'
-									// });
-
-									if (!expired) {
-										notifications.hide(id);
-									}
-								});
-
-								notifications.show({
-									id,
-									title: 'Submitting application...',
-									message: '',
-									loading: true,
-									color: 'green',
-									autoClose: 5000,
-									onClose: () => (expired = true)
-								});
-							};
-
-							reader.readAsDataURL(form.values.resume);
+							notifications.show({
+								id,
+								title: 'Submitting application...',
+								message: '',
+								loading: true,
+								color: 'green',
+								autoClose: 5000,
+								onClose: () => (expired = true)
+							});
 						} else {
 							const applicationData = {
 								...values,
