@@ -1,54 +1,32 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios, { isAxiosError } from 'axios';
+import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { dbUserToApplicant } from '../../utils/utils';
+import { getData } from '../../utils/db';
 
-export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const session = await getSession(req, res);
-	const id = session!.user.sub;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+	const id = req.cookies['ph-registration::id'];
 
 	switch (req.method) {
 		case 'POST': {
-			const data = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
+			const collection = await getData<Application>('applications');
+			const user = await collection.findOne({ _id: new ObjectId(id) });
 
-			if (data.userstatus !== 'Confirmation Pending') {
-				return res.status(400).send('User is not pending confirmation or already confirmed');
+			if (!user) {
+				return res.status(400).send('Invalid id cookie');
+			} else if (user.status !== 'Confirmation Pending') {
+				return res.status(400).send('User is not pending confirmation');
 			}
 
-			const newUser: DBEntry = {
-				...data,
-				userstatus: 'Confirmed'
-			};
-
 			try {
-				await axios.put(process.env.API_URL!, newUser);
+				const updated = await collection.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: { status: 'Confirmed' } });
 
-				return res.status(200).json(dbUserToApplicant(newUser));
+				return res.status(200).json(updated);
 			} catch (err: unknown) {
-				if (isAxiosError(err)) {
-					if (err.response) {
-						if (
-							err.status === 400 &&
-							typeof err.response.data === 'string' &&
-							err.response.data.includes('throughput for the table was exceeded')
-						) {
-							return res.status(502).send("DB is overloaded at the moment, please try again in a bit (don't close the tab).");
-						} else {
-							console.log(err.response);
-						}
-					} else {
-						console.log(err);
-					}
-
-					return res.status(500).send('An unknown error occured');
-				} else {
-					console.log(err);
-					return res.status(500).send('An unknown error occured');
-				}
+				console.log(err);
+				return res.status(500).send('An unknown error occured');
 			}
 		}
 		default:
 			return res.status(405).send('Invalid Method; use POST');
 	}
-});
+};
 

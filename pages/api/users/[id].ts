@@ -1,52 +1,44 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios, { isAxiosError } from 'axios';
+import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getData } from '../../../utils/db';
 
-export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const session = await getSession(req, res);
-	const id = session!.user.sub;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+	const id = req.cookies['ph-registration::id'];
 
 	switch (req.method) {
 		case 'GET': {
-			const user = (await axios.get<Application>(`${process.env.API_URL}/${id}`)).data;
+			const collection = await getData<Application>('applications');
+			const user = await collection.findOne({ _id: new ObjectId(id) });
+
+			if (!user) {
+				return res.status(400).send('Invalid id cookie');
+			}
 
 			if (user.admin || req.query.id === id) {
-				const response = await axios.get(`${process.env.API_URL}/${req.query.id}`); //req.query.id
+				const application = await collection.findOne({ _id: new ObjectId(req.query.id as string) });
 
-				return res.status(200).json(response.data);
+				return res.status(200).json(application);
 			} else {
 				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
 			}
 		}
 		case 'POST': {
-			const user = (await axios.get<Application>(`${process.env.API_URL}/${id}`)).data;
+			const collection = await getData<Application>('applications');
+			const user = await collection.findOne({ _id: new ObjectId(id) });
 			const data: Application = req.body;
 
-			if (user.admin || user._id.toHexString() === req.query.id) {
-				try {
-					const response = await axios.put(process.env.API_URL!, data);
-					return res.status(200).json(response.data);
-				} catch (err: unknown) {
-					if (isAxiosError(err)) {
-						if (err.response) {
-							if (
-								err.status === 400 &&
-								typeof err.response.data === 'string' &&
-								err.response.data.includes('throughput for the table was exceeded')
-							) {
-								return res.status(502).send("DB is overloaded at the moment, please try again in a bit (don't close the tab).");
-							} else {
-								console.log(err.response);
-							}
-						} else {
-							console.log(err);
-						}
+			if (!user) {
+				return res.status(400).send('Invalid id cookie');
+			}
 
-						return res.status(500).send('An unknown error occured');
-					} else {
-						console.log(err);
-						return res.status(500).send('An unknown error occured');
-					}
+			if (user.admin || id === req.query.id) {
+				try {
+					const result = await collection.findOneAndUpdate({ _id: new ObjectId(req.query.id as string) }, { $set: data });
+
+					return res.status(200).json(result);
+				} catch (err: unknown) {
+					console.log(err);
+					return res.status(500).send('An unknown error occured');
 				}
 			} else {
 				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
@@ -55,5 +47,5 @@ export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiRespo
 		default:
 			res.status(405).json('Invalid Method; use GET');
 	}
-});
+};
 

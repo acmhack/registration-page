@@ -1,46 +1,23 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios from 'axios';
+import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { dbUserToApplicant } from '../../utils/utils';
+import { getData } from '../../utils/db';
 
-export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const session = await getSession(req, res);
-	const id = session!.user.sub;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+	const id = req.cookies['ph-registration::id'];
 
-	const response = await axios.get(`${process.env.API_URL}/${id}`);
+	switch (req.method) {
+		case 'GET': {
+			const collection = await getData<Application>('applications');
+			const user = await collection.findOne({ _id: new ObjectId(id) });
 
-	if (response.headers['content-length'] === '0') {
-		const newUser: DBEntry = {
-			id,
-			admin: false,
-			userstatus: 'Profile Pending',
-			firstname: '',
-			lastname: '',
-			email: '',
-			age: '18',
-			phone: '',
-			country: 'United States',
-			school: '',
-			levelofstudy: 'Undergraduate University (3+ year)',
-			gradyear: new Date().getFullYear().toString(),
-			gradmonth: 'May',
-			shirtsize: 'M',
-			resume: null,
-			diet: '[]',
-			experience: 'My first hackathon!',
-			links: '["", ""]',
-			prehacks: false,
-			lft: false,
-			mlhcodeofconduct: false,
-			mlhcommunication: false,
-			mlhlogistics: false
-		};
+			if (!user) {
+				return res.status(400).send('Invalid id cookie');
+			}
 
-		await axios.put(`${process.env.API_URL}`, newUser);
-
-		return res.status(200).json(dbUserToApplicant(newUser));
+			return res.status(200).json(user);
+		}
+		default:
+			res.status(405).json('Invalid Method; use GET');
 	}
-
-	res.status(200).json(dbUserToApplicant(response.data));
-});
+};
 

@@ -1,4 +1,3 @@
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { Box, Button, Checkbox, Grid, Group, Stack, TextInput, Title } from '@mantine/core';
 import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -10,7 +9,7 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 
-import { getApplications, updateStatus } from '../utils/data';
+import { http } from '../utils/utils';
 
 const formatUserStatus = (userstatus: UserStatus): CSSProperties | undefined => {
 	if (userstatus == 'Admission Pending') {
@@ -18,13 +17,6 @@ const formatUserStatus = (userstatus: UserStatus): CSSProperties | undefined => 
 		return {
 			fontWeight: 'bold',
 			color: 'blue',
-			background: '##FF332222'
-		};
-	} else if (userstatus == 'Profile Pending') {
-		// In Progress
-		return {
-			fontWeight: 'bold',
-			color: 'purple',
 			background: '##FF332222'
 		};
 	} else if (userstatus == 'Confirmation Pending') {
@@ -58,17 +50,9 @@ const formatUserStatus = (userstatus: UserStatus): CSSProperties | undefined => 
 };
 
 const Admin: NextPage = () => {
-	const { user, isLoading } = useUser();
-
-	useEffect(() => {
-		if (!isLoading) {
-			console.log(user);
-		}
-	}, [user, isLoading]);
-
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-	const [records, setRecords] = useState<DBEntry[]>([]);
-	const [initialRecords, setInitialRecords] = useState<DBEntry[]>([]);
+	const [records, setRecords] = useState<Application[]>([]);
+	const [initialRecords, setInitialRecords] = useState<Application[]>([]);
 	const [query, setQuery] = useState('');
 	const [debouncedQuery] = useDebouncedValue(query, 200);
 	const [fetching, setFetching] = useState(false);
@@ -77,13 +61,13 @@ const Admin: NextPage = () => {
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
 	useEffect(() => {
-		const filteredRecords = initialRecords.filter((user: DBEntry) => {
-			if (readyForReview && user.userstatus != 'Admission Pending') {
+		const filteredRecords = initialRecords.filter((user: Application) => {
+			if (readyForReview && user.status != 'Admission Pending') {
 				return false;
 			}
 			if (
 				debouncedQuery !== '' &&
-				!`${user.firstname} ${user.lastname} ${user.email} ${user.userstatus}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase())
+				!`${user.firstName} ${user.lastName} ${user.email} ${user.status}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase())
 			) {
 				return false;
 			}
@@ -95,18 +79,18 @@ const Admin: NextPage = () => {
 		setRecords(sortStatus.direction === 'desc' ? sortedRecords.reverse() : sortedRecords);
 	}, [debouncedQuery, readyForReview, initialRecords, sortStatus]);
 
-	const updatePretty = async (id: string, userstatus: UserStatus, entry: DBEntry) => {
+	const updatePretty = async (id: string, status: UserStatus, entry: Application) => {
 		notifications.show({
 			id,
 			loading: true,
 			title: 'Update processing',
-			message: `Updating ${id}'s status to ${userstatus}`,
+			message: `Updating ${id}'s status to ${status}`,
 			autoClose: false
 		});
 		setUpdating(true);
 
 		try {
-			const responseStatus = await updateStatus(id, userstatus);
+			const responseStatus = (await http.post(`/api/users/${id}`, { status })).status;
 
 			if (responseStatus == 200) {
 				notifications.update({
@@ -117,7 +101,7 @@ const Admin: NextPage = () => {
 					icon: <IconCheck size="1rem" />,
 					autoClose: 5000
 				});
-				entry.userstatus = userstatus;
+				entry.status = status;
 			} else {
 				console.log(responseStatus);
 			}
@@ -139,9 +123,9 @@ const Admin: NextPage = () => {
 
 	useEffect(() => {
 		setFetching(true);
-		getApplications().then((records) => {
-			setInitialRecords(records);
-			setRecords(records);
+		http.get('/api/users').then((res) => {
+			setInitialRecords(res.data);
+			setRecords(res.data);
 			setFetching(false);
 		});
 	}, []);
@@ -162,14 +146,14 @@ const Admin: NextPage = () => {
 					withBorder
 					withColumnBorders
 					columns={[
-						{ accessor: 'name', width: '40%', sortable: true, render: ({ firstname, lastname }) => `${firstname} ${lastname}` },
+						{ accessor: 'name', width: '40%', sortable: true, render: ({ firstName, lastName }) => `${firstName} ${lastName}` },
 						{ accessor: 'email', width: '20%', sortable: true },
 						{
 							accessor: 'userstatus',
 							width: '20%',
 							sortable: true,
-							cellsStyle: ({ userstatus }) => formatUserStatus(userstatus),
-							render: ({ userstatus }) => userstatus
+							cellsStyle: ({ status }) => formatUserStatus(status),
+							render: ({ status }) => status
 						}
 					]}
 					records={records}
@@ -188,28 +172,26 @@ const Admin: NextPage = () => {
 									<Grid gutter="xs">
 										<Grid.Col span={4}>Name</Grid.Col>
 										<Grid.Col span={8}>
-											{user.firstname} {user.lastname}
+											{user.firstName} {user.lastName}
 										</Grid.Col>
 										<Grid.Col span={4}>Email</Grid.Col>
 										<Grid.Col span={8}>{user.email}</Grid.Col>
 										<Grid.Col span={4}>Level of Study</Grid.Col>
-										<Grid.Col span={8}>{user.levelofstudy}</Grid.Col>
-										<Grid.Col span={4}>Experience</Grid.Col>
-										<Grid.Col span={8}>{user.experience}</Grid.Col>
+										<Grid.Col span={8}>{user.levelOfStudy}</Grid.Col>
 									</Grid>
 									<Group position="center">
 										<Button
 											disabled={updating}
 											color="green"
 											sx={{ width: '100%', maxWidth: 100 }}
-											onClick={() => updatePretty(`${user.id}`, 'Confirmation Pending', user)}>
+											onClick={() => updatePretty(`${user._id}`, 'Confirmation Pending', user)}>
 											Admit
 										</Button>
 										<Button
 											disabled={updating}
 											color="red"
 											sx={{ width: '100%', maxWidth: 100 }}
-											onClick={() => updatePretty(`${user.id}`, 'Denied', user)}>
+											onClick={() => updatePretty(`${user._id}`, 'Denied', user)}>
 											Reject
 										</Button>
 									</Group>

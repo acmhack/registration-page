@@ -1,4 +1,3 @@
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import {
 	Box,
 	Button,
@@ -19,10 +18,12 @@ import { useForm } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconQuestionMark } from '@tabler/icons-react';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { http } from '../utils/utils';
 
 interface FormValues {
 	firstName: string;
@@ -305,7 +306,6 @@ const Application: NextPage = () => {
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
-	const { user } = useUser();
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
@@ -319,12 +319,18 @@ const Application: NextPage = () => {
 	// 	});
 	// }, []);
 
+	useEffect(() => {
+		if (Cookies.get('ph-registration::id') === undefined) {
+			router.replace('/api/auth/login');
+		}
+	}, [router]);
+
 	return (
 		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
-						if (!user) {
+						if (Cookies.get('ph-registration::id') === undefined) {
 							throw new Error('Shit has gone terribly wrong...');
 						}
 
@@ -334,7 +340,7 @@ const Application: NextPage = () => {
 
 							const data = new FormData();
 							data.append('resume', form.values.resume!);
-							axios.post<{ url: string }>('/api/resume', data).then((res) => {
+							http.post<{ url: string }>('/api/resume', data).then((res) => {
 								const resumeURL = res.data.url;
 
 								const applicationData = {
@@ -343,8 +349,7 @@ const Application: NextPage = () => {
 									resume: resumeURL
 								};
 
-								axios
-									.post('/api/users', applicationData)
+								http.post('/api/users', applicationData)
 									.then(() => {
 										router.replace('/dashboard');
 
@@ -384,8 +389,7 @@ const Application: NextPage = () => {
 								graduationYear: values.graduationYear.toString()
 							};
 
-							axios
-								.post('/api/users', applicationData)
+							http.post('/api/users', applicationData)
 								.then(() => {
 									router.replace('/dashboard');
 								})
@@ -631,5 +635,5 @@ const Application: NextPage = () => {
 	);
 };
 
-export default withPageAuthRequired(Application, { returnTo: '/application' });
+export default Application;
 
