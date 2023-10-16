@@ -45,7 +45,10 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 
 					await collection.findOneAndReplace({ _id: existing._id }, newApplication);
 
-					return res.status(200).json(newApplication);
+					return res
+						.status(200)
+						.setHeader('Set-Cookie', `ph-registration::id=${existing._id.toHexString()}; Max-Age=${6 * 31 * 24 * 3600}`)
+						.json(newApplication);
 				} else {
 					const application: Application = { ...data, status: 'Admission Pending' };
 					const result = await collection.insertOne(application);
@@ -53,7 +56,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 					if (result.acknowledged) {
 						return res
 							.status(201)
-							.setHeader('Set-Cookie', `ph-registration::id="${result.insertedId.toHexString()}" Max-Age=${6 * 31 * 24 * 3600}`)
+							.setHeader('Set-Cookie', `ph-registration::id=${result.insertedId.toHexString()}; Max-Age=${6 * 31 * 24 * 3600}`)
 							.json(application);
 					} else {
 						return res.status(500).send('Failed to insert new application');

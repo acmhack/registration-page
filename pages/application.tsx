@@ -19,10 +19,9 @@ import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconQuestionMark } from '@tabler/icons-react';
 import { AxiosError } from 'axios';
-import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { http } from '../utils/utils';
 
 interface FormValues {
@@ -319,21 +318,11 @@ const Application: NextPage = () => {
 	// 	});
 	// }, []);
 
-	useEffect(() => {
-		if (Cookies.get('ph-registration::id') === undefined) {
-			router.replace('/api/auth/login');
-		}
-	}, [router]);
-
 	return (
 		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
-						if (Cookies.get('ph-registration::id') === undefined) {
-							throw new Error('Shit has gone terribly wrong...');
-						}
-
 						if (form.values.resume) {
 							const id: string = 'submitting-notification';
 							let expired: boolean = false;

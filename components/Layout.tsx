@@ -1,13 +1,11 @@
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { AppShell, Burger, CSSObject, Header, Image, Navbar, Space, Text } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
-import axios from 'axios';
 import { Merriweather_Sans } from 'next/font/google';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ['300', '400', '700'] });
 
@@ -59,15 +57,14 @@ const Layout: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 	const router = useRouter();
 	const [admin, setAdmin] = useState<boolean>(false);
-	const { user } = useUser();
 
-	useEffect(() => {
-		if (user) {
-			axios.get<DBEntry>(`/api/users/${user.sub}`).then((res) => {
-				setAdmin(res.data.admin);
-			});
-		}
-	}, [user]);
+	// useEffect(() => {
+	// 	if (user) {
+	// 		axios.get<DBEntry>(`/api/users/${user.sub}`).then((res) => {
+	// 			setAdmin(res.data.admin);
+	// 		});
+	// 	}
+	// }, [user]);
 
 	return (
 		<>

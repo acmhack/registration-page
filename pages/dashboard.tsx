@@ -129,7 +129,7 @@ const Dashboard: NextPage = () => {
 
 	useEffect(() => {
 		if (Cookies.get('ph-registration::id') === undefined) {
-			router.replace('/api/auth/login');
+			router.replace('/application');
 		} else {
 			http.get<Applicant>('/api/me').then((res) => {
 				setApplicant(res.data);
