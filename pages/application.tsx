@@ -1,4 +1,3 @@
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import {
 	Box,
 	Button,
@@ -19,10 +18,11 @@ import { useForm } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconQuestionMark } from '@tabler/icons-react';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { http } from '../utils/utils';
 
 interface FormValues {
 	firstName: string;
@@ -305,47 +305,40 @@ const Application: NextPage = () => {
 	const [otherURLs, setOtherURLs] = useState<string[]>([]);
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
-	const { user } = useUser();
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
 	const router = useRouter();
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
-	useEffect(() => {
-		axios.get<Applicant>('/api/me').then((res) => {
-			if (res.data.userStatus !== 'Profile Pending') {
-				setDisabled(true);
-			}
-		});
-	}, []);
+	// useEffect(() => {
+	// 	axios.get<Applicant>('/api/me').then((res) => {
+	// 		if (res.data.userStatus !== 'Profile Pending') {
+	// 			setDisabled(true);
+	// 		}
+	// 	});
+	// }, []);
 
 	return (
 		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
-						if (!user) {
-							throw new Error('Shit has gone terribly wrong...');
-						}
-
 						if (form.values.resume) {
-							const reader = new FileReader();
+							const id: string = 'submitting-notification';
+							let expired: boolean = false;
 
-							reader.onloadend = () => {
-								const resultString = reader.result as string;
-								const resume = resultString.slice(resultString.indexOf(',') + 1);
+							const data = new FormData();
+							data.append('resume', form.values.resume!);
+							http.post<{ url: string }>('/api/resume', data).then((res) => {
+								const resumeURL = res.data.url;
 
 								const applicationData = {
 									...values,
 									graduationYear: values.graduationYear.toString(),
-									resume
+									resume: resumeURL
 								};
 
-								const id: string = 'submitting-notification';
-								let expired: boolean = false;
-
-								axios
-									.post('/api/users', applicationData)
+								http.post('/api/users', applicationData)
 									.then(() => {
 										router.replace('/dashboard');
 
@@ -368,27 +361,24 @@ const Application: NextPage = () => {
 											}
 										}
 									});
+							});
 
-								notifications.show({
-									id,
-									title: 'Submitting application...',
-									message: '',
-									loading: true,
-									color: 'green',
-									autoClose: 5000,
-									onClose: () => (expired = true)
-								});
-							};
-
-							reader.readAsDataURL(form.values.resume);
+							notifications.show({
+								id,
+								title: 'Submitting application...',
+								message: '',
+								loading: true,
+								color: 'green',
+								autoClose: 5000,
+								onClose: () => (expired = true)
+							});
 						} else {
 							const applicationData = {
 								...values,
 								graduationYear: values.graduationYear.toString()
 							};
 
-							axios
-								.post('/api/users', applicationData)
+							http.post('/api/users', applicationData)
 								.then(() => {
 									router.replace('/dashboard');
 								})
@@ -634,5 +624,5 @@ const Application: NextPage = () => {
 	);
 };
 
-export default withPageAuthRequired(Application, { returnTo: '/application' });
+export default Application;
 

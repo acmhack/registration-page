@@ -1,4 +1,3 @@
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Title } from '@mantine/core';
 import { NextPage } from 'next/types';
 
@@ -10,5 +9,5 @@ const Team: NextPage = () => {
 	);
 };
 
-export default withPageAuthRequired(Team, { returnTo: '/team' });
+export default Team;
 

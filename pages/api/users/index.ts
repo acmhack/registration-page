@@ -1,102 +1,72 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
-import axios, { isAxiosError } from 'axios';
+import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getData } from '../../../utils/db';
 
-export default withApiAuthRequired(async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const session = await getSession(req, res);
-	const id = session!.user.sub;
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+	const id = req.cookies['ph-registration::id'];
 
 	switch (req.method) {
 		case 'GET': {
-			const user = (await axios.get<DBEntry>(`${process.env.API_URL}/${id}`)).data;
+			if (!id) {
+				// TODO: consider whether POST should be protected by something similar
+				return res.status(400).send('Missing id cookie');
+			}
 
-			if (user.admin) {
-				const response = await axios.get(process.env.API_URL!);
+			try {
+				const collection = await getData<Application>('applications');
 
-				return res.status(200).json(response.data);
-			} else {
-				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
+				const user = await collection.findOne({ _id: new ObjectId(id) });
+
+				if (!user) {
+					return res.status(400).send('Invalid id cookie');
+				}
+
+				if (user.admin) {
+					const applications = await collection.find().toArray();
+
+					return res.status(200).json(applications);
+				} else {
+					return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
+				}
+			} catch (err: unknown) {
+				console.log(err);
+				return res.status(500).send('An unknown error occured');
 			}
 		}
 		case 'POST': {
-			const {
-				firstName,
-				lastName,
-				email,
-				age,
-				phoneNumber,
-				country,
-				school,
-				levelOfStudy,
-				graduationMonth,
-				graduationYear,
-				shirtSize,
-				dietRestrictions,
-				hackathonCount,
-				resume,
-				linkedin,
-				github,
-				otherSites,
-				attendingPrehacks,
-				lookingForTeam,
-				codeOfConductAgreement,
-				dataAgreement,
-				mlhAgreement
-			} = req.body as JSONFormValues;
-
-			const data: DBEntry = {
-				id,
-				admin: false,
-				userstatus: 'Admission Pending',
-				firstname: firstName,
-				lastname: lastName,
-				email,
-				age,
-				phone: phoneNumber,
-				country,
-				school,
-				levelofstudy: levelOfStudy,
-				gradyear: graduationYear,
-				gradmonth: graduationMonth,
-				shirtsize: shirtSize,
-				resume,
-				diet: JSON.stringify(dietRestrictions),
-				experience: hackathonCount,
-				links: JSON.stringify([linkedin, github, ...otherSites]),
-				prehacks: attendingPrehacks,
-				lft: lookingForTeam,
-				mlhcodeofconduct: codeOfConductAgreement,
-				mlhcommunication: dataAgreement,
-				mlhlogistics: mlhAgreement
-			};
+			const data = req.body as Omit<Application, 'status'>;
 
 			try {
-				const response = await axios.put(process.env.API_URL!, data);
+				const collection = await getData<Application>('applications');
+				const existing = await collection.findOne({ email: data.email });
 
-				return res.status(200).json(response.data);
-			} catch (err: unknown) {
-				if (isAxiosError(err)) {
-					if (err.response) {
-						if (
-							err.status === 400 &&
-							typeof err.response.data === 'string' &&
-							err.response.data.includes('throughput for the table was exceeded')
-						) {
-							return res.status(502).send("DB is overloaded at the moment, please try again in a bit (don't close the tab).");
-						} else {
-							console.log(err.response);
-						}
-					} else {
-						console.log(err);
-					}
+				if (existing) {
+					const newApplication: Application = { ...data, status: 'Admission Pending' };
 
-					return res.status(500).send('An unknown error occured');
+					await collection.findOneAndReplace({ _id: existing._id }, newApplication);
+
+					return res
+						.status(200)
+						.setHeader('Set-Cookie', `ph-registration::id=${existing._id.toHexString()}; Max-Age=${6 * 31 * 24 * 3600}`)
+						.json(newApplication);
 				} else {
-					console.log(err);
-					return res.status(500).send('An unknown error occured');
+					const application: Application = { ...data, status: 'Admission Pending' };
+					const result = await collection.insertOne(application);
+
+					if (result.acknowledged) {
+						return res
+							.status(201)
+							.setHeader('Set-Cookie', `ph-registration::id=${result.insertedId.toHexString()}; Max-Age=${6 * 31 * 24 * 3600}`)
+							.json(application);
+					} else {
+						return res.status(500).send('Failed to insert new application');
+					}
 				}
+			} catch (err: unknown) {
+				console.log(err);
+				return res.status(500).send('An unknown error occured');
 			}
 		}
 	}
-});
+};
 

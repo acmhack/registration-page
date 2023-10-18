@@ -1,16 +1,15 @@
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import { Anchor, Button, Flex, Group, Image, MediaQuery, Stack, Switch, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
 import { Merriweather_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
-import { calculateRemainingTime } from '../utils/utils';
+import { calculateRemainingTime, http } from '../utils/utils';
 
 const WelcomeFont = localFont({ src: './fonts/IntroScript.otf' });
 const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ['300', '400', '700'] });
@@ -52,33 +51,16 @@ const Status: FC<{
 			<Title order={2} inline align="center" color={'white'} weight={'bold'} fz={smol ? 22 : 31} mb={8} className={MerriweatherFont.className}>
 				PickHacks Checklist
 			</Title>
-			<Group
-				bg={applicant.userStatus !== 'Profile Pending' ? 'rgba(12, 135, 70, .8)' : '#1B5A7F'}
-				style={{ borderRadius: 45 }}
-				p={smol ? 15 : 22}
-				w="100%"
-				position="center">
-				{applicant.userStatus !== 'Profile Pending' && (
+			<Group bg={'rgba(12, 135, 70, .8)'} style={{ borderRadius: 45 }} p={smol ? 15 : 22} w="100%" position="center">
+				{applicant.userStatus === 'Admission Pending' && (
 					<Text color="white" weight="bold" className={MerriweatherFont.className} fz={smol ? 15 : 18}>
 						Profile Completed
 					</Text>
 				)}
-				{applicant.userStatus === 'Profile Pending' && (
-					<Link
-						href="/application"
-						style={{ color: 'white', fontWeight: 'bold', fontSize: smol ? '15px' : '18px', textAlign: 'center' }}
-						className={MerriweatherFont.className}>
-						Complete your application
-					</Link>
-				)}
 			</Group>
 			<Group
 				w="100%"
-				bg={
-					applicant.userStatus !== 'Profile Pending' && applicant.userStatus !== 'Admission Pending'
-						? 'rgba(12, 135, 70, .8)'
-						: 'rgba(27, 90, 127, .4)'
-				}
+				bg={applicant.userStatus !== 'Admission Pending' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
 				style={{ borderRadius: 45 }}
 				p={smol ? 15 : 22}
 				position="center">
@@ -120,7 +102,6 @@ const Status: FC<{
 };
 
 const Dashboard: NextPage = () => {
-	const { user, isLoading } = useUser();
 	const router = useRouter();
 	const [confirming, setConfirming] = useState<boolean>(false);
 	const [lft, setLFT] = useState<boolean>(false);
@@ -131,8 +112,7 @@ const Dashboard: NextPage = () => {
 
 	const toggleLFT = useCallback(() => {
 		setTogglingLFT(true);
-		axios
-			.post('/api/lft')
+		http.post('/api/lft')
 			.then(() => {
 				setLFT((lft) => !lft);
 			})
@@ -148,15 +128,15 @@ const Dashboard: NextPage = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!user && !isLoading) {
-			router.replace('/api/auth/login');
-		} else if (!isLoading) {
-			axios.get<Applicant>('/api/me').then((res) => {
+		if (Cookies.get('ph-registration::id') === undefined) {
+			router.replace('/application');
+		} else {
+			http.get<Applicant>('/api/me').then((res) => {
 				setApplicant(res.data);
 				setLFT(res.data.lookingForTeam);
 			});
 		}
-	}, [user, router, isLoading]);
+	}, [router]);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -214,8 +194,7 @@ const Dashboard: NextPage = () => {
 						<Status
 							applicant={applicant}
 							onConfirm={() => {
-								axios
-									.post('/api/confirm')
+								http.post('/api/confirm')
 									.then((res) => {
 										setConfirming(false);
 										setApplicant(res.data);
@@ -453,5 +432,5 @@ const Dashboard: NextPage = () => {
 	);
 };
 
-export default withPageAuthRequired(Dashboard, { returnTo: '/dashboard' });
+export default Dashboard;
 
