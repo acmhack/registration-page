@@ -29,5 +29,10 @@ interface ApplicationData {
 	codeOfConductAgreement: boolean;
 	dataAgreement: boolean;
 	mlhAgreement: boolean;
+
+	category: string | null;
+	featured: boolean;
+	projectLink: string | null;
+	projectName: string | null;
 }
 
