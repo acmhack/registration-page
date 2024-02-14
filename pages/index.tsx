@@ -316,9 +316,9 @@ const Application: NextPage = () => {
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16} pt={90}>
 				<form
 					onSubmit={form.onSubmit((values) => {
+                        const id: string = 'submitting-notification';
+                        let expired: boolean = false;
 						if (values.resume) {
-							const id: string = 'submitting-notification';
-							let expired: boolean = false;
 
 							if (typeof values.resume === 'string' || form.values.resume === null) {
 								const applicationData = {
@@ -387,32 +387,41 @@ const Application: NextPage = () => {
 								});
 							}
 
-							notifications.show({
-								id,
-								title: 'Submitting application...',
-								message: '',
-								loading: true,
-								color: 'green',
-								autoClose: 5000,
-								onClose: () => (expired = true),
-							});
 						} else {
-							const applicationData = {
-								...values,
+                            const applicationData = {
+                                ...values,
 								graduationYear: values.graduationYear.toString(),
 							};
-
+                            
 							http.post('/api/users', applicationData)
-								.then(() => {
-									router.replace('/success');
-								})
-								.catch((err: AxiosError) => {
-									if (err.response) {
-										console.log(err.response.data);
-									}
-								});
+                            .then(() => {
+                                router.replace('/success');
+                            })
+                            .catch((err: AxiosError) => {
+                                if (err.response) {
+                                    notifications.show({
+                                        message: err.response.data as string,
+                                        title: 'Something went wrong...',
+                                        autoClose: 5000,
+                                        color: 'red',
+                                    });
+                                    
+                                    if (!expired) {
+                                        notifications.hide(id);
+                                    }
+                                }
+                            });
 						}
-
+                        
+                        notifications.show({
+                            id,
+                            title: 'Submitting application...',
+                            message: '',
+                            loading: true,
+                            color: 'green',
+                            autoClose: 5000,
+                            onClose: () => (expired = true),
+                        });
 						setSubmitted(true);
 					})}
 				>
