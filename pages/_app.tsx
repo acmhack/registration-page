@@ -10,15 +10,15 @@ export default function App(props: AppProps) {
 		<>
 			<Head>
 				<title>PickHacks Registration</title>
-				<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-				<link rel="shortcut icon" href="favicon.ico" />
+				<meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width' />
+				<link rel='shortcut icon' href='favicon.ico' />
 			</Head>
 
 			<MantineProvider
 				withGlobalStyles
 				withNormalizeCSS
 				theme={{
-					colorScheme: 'light',
+					colorScheme: 'dark',
 					loader: 'oval',
 					colors: {
 						green: [
@@ -30,15 +30,25 @@ export default function App(props: AppProps) {
 										.map((hex) => (hex.length < 2 ? '0' + hex : hex))
 										.join('')
 							) as Tuple<string, 10>)
+						],
+						pink: [
+							...(new Array(10).fill(null).map(
+								() =>
+									'#' +
+									[255, 82, 210]
+										.map((val) => val.toString(16))
+										.map((hex) => (hex.length < 2 ? '0' + hex : hex))
+										.join('')
+							) as Tuple<string, 10>)
 						]
 					},
-					primaryColor: 'green'
-				}}>
-					<Layout>
-						<Component {...pageProps} />
-					</Layout>
+					primaryColor: 'pink'
+				}}
+			>
+				{/* <Layout> */}
+				<Component {...pageProps} />
+				{/* </Layout> */}
 			</MantineProvider>
 		</>
 	);
 }
-

@@ -17,9 +17,9 @@ interface FormValues {
 	phoneNumber: string;
 	age: string;
 	graduationMonth: string;
-	graduationYear: number;
+	graduationYear: string;
 	country: string;
-	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
+	shirtSize: '' | 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 	dietRestrictions: string[];
 	school: string;
 	levelOfStudy: string;
@@ -230,6 +230,7 @@ const countries = [
 ];
 
 const levelsOfStudy: string[] = [
+	'',
 	'Less than Secondary/High School',
 	'Secondary/High School',
 	'Undergraduate University (2 year - community college or similar)',
@@ -242,20 +243,22 @@ const levelsOfStudy: string[] = [
 	'Prefer not to answer'
 ];
 
+const schools: string[] = ['', 'Missouri S&T', 'UMSL', 'Truman State University', 'Mizzou', 'Other'];
+
 const Application: NextPage = () => {
 	const form = useForm<FormValues>({
 		initialValues: {
 			firstName: '',
 			lastName: '',
 			email: '',
-			age: '18',
+			age: '',
 			phoneNumber: '',
 			country: 'United States',
 			school: '',
-			levelOfStudy: 'Undergraduate University (3+ year)',
-			graduationYear: new Date().getFullYear(),
-			graduationMonth: 'May',
-			shirtSize: 'M',
+			levelOfStudy: '',
+			graduationYear: '',
+			graduationMonth: '',
+			shirtSize: '',
 			resume: null,
 			dietRestrictions: [],
 			// attendingPrehacks: false,
@@ -268,33 +271,35 @@ const Application: NextPage = () => {
 			lastName: (value) => (value === '' ? 'Please enter your last name' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			age: (value) => (/^\d{1,2}$/.test(value) ? null : 'Invalid age'),
-			phoneNumber: (value) =>
-				value === '' || value === undefined || /^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)',
-			graduationYear: (value) => (/^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
-			graduationMonth: (value) => (value === '' ? 'Please select a graduation month' : null),
-			school: (value) => (value === '' ? 'Please enter your school' : null)
+			phoneNumber: (value) => (/^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)'),
+			shirtSize: (value) => (value === '' ? 'Please select a shirt size' : null),
+			graduationYear: (value) => (step < 2 ? null : /^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
+			graduationMonth: (value) => (step < 2 ? null : value === '' ? 'Please select a graduation month' : null),
+			school: (value) => (step < 2 ? null : value === '' ? 'Please enter your school' : null)
 		}
 	});
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [disabled, setDisabled] = useState<boolean>(false);
+	const [openOther, setOpenOther] = useState<boolean>(false);
+	const [school, setSchool] = useState<string>('');
+
 	const router = useRouter();
-	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
 	useEffect(() => {
 		if (Cookies.get('ph-registration::id') !== undefined) {
 			http.get<ApplicationData>('/api/me').then((res) => {
 				const user = res.data;
 
-				form.setValues({ ...user, graduationYear: Number(user.graduationYear) });
+				form.setValues({ ...user, graduationYear: user.graduationYear });
 			});
 		}
 	}, [router, form]);
 
 	return (
-		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
-			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
+		<div>
+			<Box sx={{ maxWidth: 1200 }} mx='auto' p={16} pt={32}>
 				<form
 					onSubmit={form.onSubmit((values) => {
 						if (values.resume) {
@@ -338,7 +343,7 @@ const Application: NextPage = () => {
 
 									const applicationData = {
 										...values,
-										graduationYear: values.graduationYear.toString(),
+										graduationYear: values.graduationYear,
 										resume: resumeURL
 									};
 
@@ -395,7 +400,8 @@ const Application: NextPage = () => {
 						}
 
 						setSubmitted(true);
-					})}>
+					})}
+				>
 					<fieldset disabled={disabled} style={{ border: 0 }}>
 						<Stepper
 							active={step}
@@ -403,29 +409,119 @@ const Application: NextPage = () => {
 								if (!form.validate().hasErrors) {
 									setStep(step);
 								}
-							}}>
-							<Stepper.Step label="Contact Info">
-								<Box sx={{ maxWidth: 600 }} mx="auto">
-									<Stack>
+							}}
+						>
+							<Stepper.Step label='Contact Info'>
+								<Box sx={{ maxWidth: 700, marginTop: '5%' }} mx='auto'>
+									<Stack sx={{ gap: '1.5em' }}>
 										<Group grow={true}>
-											<TextInput disabled={disabled} required label="First Name" {...form.getInputProps('firstName')} />
-											<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
+											<TextInput disabled={disabled} required label='First Name' {...form.getInputProps('firstName')} />
+											<TextInput required label='Last Name' {...form.getInputProps('lastName')} />
 										</Group>
 										<Group grow={true}>
-											<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
-											<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
+											<TextInput required label='Email' placeholder='your@email.com' {...form.getInputProps('email')} />
+											<TextInput maxLength={10} required label='Phone Number' placeholder='0123456789' {...form.getInputProps('phoneNumber')} />
 										</Group>
+
+										<NativeSelect
+											required
+											label='What is your age?'
+											data={['', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
+											{...form.getInputProps('age')}
+										/>
+										<NativeSelect
+											required
+											label='In which country do you currently reside?'
+											data={countries}
+											{...form.getInputProps('country')}
+										/>
 										<Group grow={true}>
 											<NativeSelect
 												required
-												label="What is your age?"
-												data={['Prefer not to answer', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
-												{...form.getInputProps('age')}
+												label='T-Shirt Size'
+												{...form.getInputProps('shirtSize')}
+												data={['', 'XS', 'S', 'M', 'L', 'XL', 'XXL']}
 											/>
+											<MultiSelect
+												label='Dietary Restrictions'
+												{...form.getInputProps('dietRestrictions')}
+												data={dietOptions}
+												searchable
+												creatable
+												getCreateLabel={(query) => query}
+												onCreate={(query) => {
+													setDietOptions([...dietOptions, query]);
+													return query;
+												}}
+											/>
+										</Group>
+										<Group position='right' mt='md'>
+											<Button
+												onClick={() => {
+													if (!form.validate().hasErrors) {
+														setStep(step + 1);
+													}
+												}}
+											>
+												Next
+											</Button>
+										</Group>
+									</Stack>
+								</Box>
+							</Stepper.Step>
+							<Stepper.Step label='Education'>
+								<Box sx={{ maxWidth: 700, marginTop: '5%' }} mx='auto'>
+									<Stack>
+										{/* <Switch
+											label={
+												<Group spacing={4}>
+													<Text>I am interested in attending the PreHacks event</Text>
+													<Tooltip
+														label="PreHacks is a beginner-friendly workshop hosted by the PickHacks' development team to cover web design, app design, and other topics to better prepare you for PickHacks! If you've never been to a hackathon or want to pick up some new skills, PreHacks is the perfect opportunity for you!"
+														multiline>
+														<IconQuestionMark size={18} />
+													</Tooltip>
+												</Group>
+											}
+											{...form.getInputProps('attendingPrehacks')}
+										/> */}
+										<NativeSelect
+											required
+											label='In what type of educational institution are you currently enrolled?'
+											data={levelsOfStudy}
+											{...form.getInputProps('levelOfStudy')}
+										/>
+										<Group spacing={0}>
 											<NativeSelect
 												required
-												label="Graduation Month"
+												data={schools}
+												label="What school do you currently attend? If you're no longer a student, what school/university did you most recently graduate from?"
+												{...form.getInputProps('school')}
+												value={school}
+												onChange={(e) => {
+													setSchool(e.target.value);
+													if (e.target.value === 'Other') {
+														setOpenOther(true);
+													} else {
+														setOpenOther(false);
+													}
+												}}
+											/>
+											<Text fz='xs' color='white'>
+												Don&apos;t use abbreviations -- please write the full name of the school / university. Enter &quot;None&quot;
+												if you have never attended / graduated from a school/university.
+											</Text>
+										</Group>
+										{openOther && (
+											<TextInput required label='School' placeholder='Enter your school name' {...form.getInputProps('school')} />
+										)}
+
+										<Group grow>
+											<NativeSelect
+												required
+												label='Graduation Month'
 												data={[
+													'',
 													'January',
 													'February',
 													'March',
@@ -441,58 +537,21 @@ const Application: NextPage = () => {
 												]}
 												{...form.getInputProps('graduationMonth')}
 											/>
-											<NumberInput required label="Graduation Year" {...form.getInputProps('graduationYear')} />
-										</Group>
-										<NativeSelect
-											required
-											label="In which country do you currently reside?"
-											data={countries}
-											{...form.getInputProps('country')}
-										/>
-										<Group grow={true}>
 											<NativeSelect
 												required
-												label="T-Shirt Size"
-												{...form.getInputProps('shirtSize')}
-												data={['XS', 'S', 'M', 'L', 'XL', 'XXL']}
-											/>
-											<MultiSelect
-												label="Dietary Restrictions"
-												{...form.getInputProps('dietRestrictions')}
-												data={dietOptions}
-												searchable
-												creatable
-												getCreateLabel={(query) => query}
-												onCreate={(query) => {
-													setDietOptions([...dietOptions, query]);
-													return query;
-												}}
+												label='Graduation Year'
+												{...form.getInputProps('graduationYear')}
+												data={['', ...new Array(5).fill(null).map((_, i) => (i + new Date().getFullYear()).toString())]}
 											/>
 										</Group>
-										<Group spacing={0}>
-											<TextInput
-												required
-												label="What school do you currently attend? If you're no longer a student, what school/university did you most recently graduate from?"
-												{...form.getInputProps('school')}
-											/>
-											<Text fz="xs">
-												Don&apos;t use abbreviations -- please write the full name of the school / university. Enter &quot;None&quot;
-												if you have never attended / graduated from a school/university.
-											</Text>
-										</Group>
-										<NativeSelect
-											required
-											label="In what type of educational institution are you currently enrolled?"
-											data={levelsOfStudy}
-											{...form.getInputProps('levelOfStudy')}
-										/>
+
 										{/* TODO: FileInput has a Capture prop has type boolean | "user" | "environment"
 										Add after we know hosting server and resume site api */}
 										{typeof form.values.resume === 'string' ? (
 											<>
 												<Input.Label>Resume</Input.Label>
 												<Group>
-													<Link href={form.values.resume} target="_blank" rel="noopener noreferrer">
+													<Link href={form.values.resume} target='_blank' rel='noopener noreferrer'>
 														<Text style={{ color: '#148648', fontWeight: 'bold' }}>View</Text>
 													</Link>
 													<Button onClick={() => form.setFieldValue('resume', null)}>Replace</Button>
@@ -500,51 +559,23 @@ const Application: NextPage = () => {
 											</>
 										) : (
 											<FileInput
-												label="Upload your resume. PDF only!"
-												description="Resume is optional, but highly encouraged for your application."
+												label='Upload your resume. PDF only!'
+												description='Resume is optional, but highly encouraged for your application.'
 												{...form.getInputProps('resume')}
-												placeholder="Submit resume"
-												accept="application/pdf"
+												placeholder='Submit your resume'
+												accept='application/pdf'
 												descriptionProps={{
-													style: { color: 'black' }
+													style: { color: 'white' }
 												}}
 											/>
 										)}
-										<Group position="right" mt="md">
-											<Button
-												onClick={() => {
-													if (!form.validate().hasErrors) {
-														setStep(step + 1);
-													}
-												}}>
-												Next
-											</Button>
-										</Group>
-									</Stack>
-								</Box>
-							</Stepper.Step>
-							<Stepper.Step label="Consent">
-								<Box sx={{ maxWidth: 600 }} mx="auto">
-									<Stack>
-										{/* <Switch
-											label={
-												<Group spacing={4}>
-													<Text>I am interested in attending the PreHacks event</Text>
-													<Tooltip
-														label="PreHacks is a beginner-friendly workshop hosted by the PickHacks' development team to cover web design, app design, and other topics to better prepare you for PickHacks! If you've never been to a hackathon or want to pick up some new skills, PreHacks is the perfect opportunity for you!"
-														multiline>
-														<IconQuestionMark size={18} />
-													</Tooltip>
-												</Group>
-											}
-											{...form.getInputProps('attendingPrehacks')}
-										/> */}
+
 										<Checkbox
 											required
 											label={
 												<>
 													<span style={{ color: 'red' }}>*</span> I have read and agree to the{' '}
-													<a href="https://static.mlh.io/docs/mlh-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer">
+													<a href='https://static.mlh.io/docs/mlh-code-of-conduct.pdf' target='_blank' rel='noopener noreferrer'>
 														MLH Code of Conduct.
 													</a>
 												</>
@@ -557,18 +588,19 @@ const Application: NextPage = () => {
 												<>
 													<span style={{ color: 'red' }}>*</span> I authorize you to share my application/registration information
 													with Major League Hacking for event administration, ranking, and MLH administration inline with the{' '}
-													<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
+													<a href='https://mlh.io/privacy' target='_blank' rel='noopener noreferrer'>
 														MLH Privacy Policy
 													</a>
 													. I further I agree to the terms of both the{' '}
 													<a
-														href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md"
-														target="_blank"
-														rel="noopener noreferrer">
+														href='https://github.com/MLH/mlh-policies/blob/main/contest-terms.md'
+														target='_blank'
+														rel='noopener noreferrer'
+													>
 														MLH Contest Terms and Conditions
 													</a>{' '}
 													and the{' '}
-													<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
+													<a href='https://mlh.io/privacy' target='_blank' rel='noopener noreferrer'>
 														MLH Privacy Policy.
 													</a>
 												</>
@@ -576,21 +608,22 @@ const Application: NextPage = () => {
 											{...form.getInputProps('dataAgreement')}
 										/>
 										<Checkbox
-											label="I authorize MLH to send me an email where I can further opt into the MLH Hacker, Events, or Organizer
-												Newsletters and other communications from MLH"
+											label='I authorize MLH to send me an email where I can further opt into the MLH Hacker, Events, or Organizer
+												Newsletters and other communications from MLH'
 											{...form.getInputProps('mlhAgreement')}
 										/>
 
-										<Group position="right" mt="md">
+										<Group position='right' mt='md'>
 											<Button
-												variant="default"
+												variant='default'
 												disabled={submitted}
 												onClick={() => {
 													setStep(step - 1);
-												}}>
+												}}
+											>
 												Back
 											</Button>
-											<Button type="submit" loading={submitted}>
+											<Button type='submit' loading={submitted}>
 												Submit
 											</Button>
 										</Group>
@@ -606,4 +639,3 @@ const Application: NextPage = () => {
 };
 
 export default Application;
-
