@@ -226,7 +226,7 @@ const countries = [
 	'Vietnam',
 	'Yemen',
 	'Zambia',
-	'Zimbabwe'
+	'Zimbabwe',
 ];
 
 const levelsOfStudy: string[] = [
@@ -240,7 +240,7 @@ const levelsOfStudy: string[] = [
 	'Other Vocational/Trade Program/Apprenticeship',
 	'Other',
 	"I'm currently not a student",
-	'Prefer not to answer'
+	'Prefer not to answer',
 ];
 
 const schools: string[] = ['', 'Missouri S&T', 'UMSL', 'Truman State University', 'Mizzou', 'Other'];
@@ -264,7 +264,7 @@ const Application: NextPage = () => {
 			// attendingPrehacks: false,
 			codeOfConductAgreement: false,
 			dataAgreement: false,
-			mlhAgreement: false
+			mlhAgreement: false,
 		},
 		validate: {
 			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
@@ -275,8 +275,8 @@ const Application: NextPage = () => {
 			shirtSize: (value) => (value === '' ? 'Please select a shirt size' : null),
 			graduationYear: (value) => (step < 2 ? null : /^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
 			graduationMonth: (value) => (step < 2 ? null : value === '' ? 'Please select a graduation month' : null),
-			school: (value) => (step < 2 ? null : value === '' ? 'Please enter your school' : null)
-		}
+			school: (value) => (step < 2 ? null : value === '' ? 'Please enter your school' : null),
+		},
 	});
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
@@ -299,7 +299,21 @@ const Application: NextPage = () => {
 
 	return (
 		<div>
-			<Box sx={{ maxWidth: 1200 }} mx='auto' p={16} pt={32}>
+			<Group sx={{ position: 'absolute' }} top={25} left={25}>
+				<img src="/Logo2024.png" height={35} width={35}></img>
+				<Text
+					weight={'bold'}
+					sx={{
+						background: 'linear-gradient(45deg, #fc77d9 0%, #a369f5 40%, #544bd6 65%, #5c52e0 92%)',
+						WebkitBackgroundClip: 'text',
+						WebkitTextFillColor: 'transparent',
+						fontSize: '1.3em',
+					}}
+				>
+					PickHacks 2024
+				</Text>
+			</Group>
+			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16} pt={90}>
 				<form
 					onSubmit={form.onSubmit((values) => {
 						if (values.resume) {
@@ -309,12 +323,12 @@ const Application: NextPage = () => {
 							if (typeof values.resume === 'string' || form.values.resume === null) {
 								const applicationData = {
 									...values,
-									graduationYear: values.graduationYear.toString()
+									graduationYear: values.graduationYear.toString(),
 								};
 
 								http.post('/api/users', applicationData)
 									.then(() => {
-										router.replace('/dashboard');
+										router.replace('/success');
 
 										if (!expired) {
 											notifications.hide(id);
@@ -327,7 +341,7 @@ const Application: NextPage = () => {
 												message: err.response.data as string,
 												title: 'Something went wrong...',
 												autoClose: 5000,
-												color: 'red'
+												color: 'red',
 											});
 
 											if (!expired) {
@@ -344,12 +358,12 @@ const Application: NextPage = () => {
 									const applicationData = {
 										...values,
 										graduationYear: values.graduationYear,
-										resume: resumeURL
+										resume: resumeURL,
 									};
 
 									http.post('/api/users', applicationData)
 										.then(() => {
-											router.replace('/dashboard');
+											router.replace('/success');
 
 											if (!expired) {
 												notifications.hide(id);
@@ -362,7 +376,7 @@ const Application: NextPage = () => {
 													message: err.response.data as string,
 													title: 'Something went wrong...',
 													autoClose: 5000,
-													color: 'red'
+													color: 'red',
 												});
 
 												if (!expired) {
@@ -380,17 +394,17 @@ const Application: NextPage = () => {
 								loading: true,
 								color: 'green',
 								autoClose: 5000,
-								onClose: () => (expired = true)
+								onClose: () => (expired = true),
 							});
 						} else {
 							const applicationData = {
 								...values,
-								graduationYear: values.graduationYear.toString()
+								graduationYear: values.graduationYear.toString(),
 							};
 
 							http.post('/api/users', applicationData)
 								.then(() => {
-									router.replace('/dashboard');
+									router.replace('/success');
 								})
 								.catch((err: AxiosError) => {
 									if (err.response) {
@@ -411,39 +425,45 @@ const Application: NextPage = () => {
 								}
 							}}
 						>
-							<Stepper.Step label='Contact Info'>
-								<Box sx={{ maxWidth: 700, marginTop: '5%' }} mx='auto'>
+							<Stepper.Step label="Contact Info">
+								<Box sx={{ maxWidth: 700, marginTop: '3%' }} mx="auto">
 									<Stack sx={{ gap: '1.5em' }}>
 										<Group grow={true}>
-											<TextInput disabled={disabled} required label='First Name' {...form.getInputProps('firstName')} />
-											<TextInput required label='Last Name' {...form.getInputProps('lastName')} />
+											<TextInput disabled={disabled} required label="First Name" {...form.getInputProps('firstName')} />
+											<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
 										</Group>
 										<Group grow={true}>
-											<TextInput required label='Email' placeholder='your@email.com' {...form.getInputProps('email')} />
-											<TextInput maxLength={10} required label='Phone Number' placeholder='0123456789' {...form.getInputProps('phoneNumber')} />
+											<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
+											<TextInput
+												maxLength={10}
+												required
+												label="Phone Number"
+												placeholder="0123456789"
+												{...form.getInputProps('phoneNumber')}
+											/>
 										</Group>
 
 										<NativeSelect
 											required
-											label='What is your age?'
+											label="What is your age?"
 											data={['', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
 											{...form.getInputProps('age')}
 										/>
 										<NativeSelect
 											required
-											label='In which country do you currently reside?'
+											label="In which country do you currently reside?"
 											data={countries}
 											{...form.getInputProps('country')}
 										/>
 										<Group grow={true}>
 											<NativeSelect
 												required
-												label='T-Shirt Size'
+												label="T-Shirt Size"
 												{...form.getInputProps('shirtSize')}
 												data={['', 'XS', 'S', 'M', 'L', 'XL', 'XXL']}
 											/>
 											<MultiSelect
-												label='Dietary Restrictions'
+												label="Dietary Restrictions"
 												{...form.getInputProps('dietRestrictions')}
 												data={dietOptions}
 												searchable
@@ -455,7 +475,7 @@ const Application: NextPage = () => {
 												}}
 											/>
 										</Group>
-										<Group position='right' mt='md'>
+										<Group position="right" mt="md">
 											<Button
 												onClick={() => {
 													if (!form.validate().hasErrors) {
@@ -469,8 +489,8 @@ const Application: NextPage = () => {
 									</Stack>
 								</Box>
 							</Stepper.Step>
-							<Stepper.Step label='Education'>
-								<Box sx={{ maxWidth: 700, marginTop: '5%' }} mx='auto'>
+							<Stepper.Step label="Education">
+								<Box sx={{ maxWidth: 700, marginTop: '2%' }} mx="auto">
 									<Stack>
 										{/* <Switch
 											label={
@@ -487,7 +507,7 @@ const Application: NextPage = () => {
 										/> */}
 										<NativeSelect
 											required
-											label='In what type of educational institution are you currently enrolled?'
+											label="In what type of educational institution are you currently enrolled?"
 											data={levelsOfStudy}
 											{...form.getInputProps('levelOfStudy')}
 										/>
@@ -507,19 +527,19 @@ const Application: NextPage = () => {
 													}
 												}}
 											/>
-											<Text fz='xs' color='white'>
+											<Text fz="xs" color="white">
 												Don&apos;t use abbreviations -- please write the full name of the school / university. Enter &quot;None&quot;
 												if you have never attended / graduated from a school/university.
 											</Text>
 										</Group>
 										{openOther && (
-											<TextInput required label='School' placeholder='Enter your school name' {...form.getInputProps('school')} />
+											<TextInput required label="School" placeholder="Enter your school name" {...form.getInputProps('school')} />
 										)}
 
 										<Group grow>
 											<NativeSelect
 												required
-												label='Graduation Month'
+												label="Graduation Month"
 												data={[
 													'',
 													'January',
@@ -533,13 +553,13 @@ const Application: NextPage = () => {
 													'September',
 													'October',
 													'November',
-													'December'
+													'December',
 												]}
 												{...form.getInputProps('graduationMonth')}
 											/>
 											<NativeSelect
 												required
-												label='Graduation Year'
+												label="Graduation Year"
 												{...form.getInputProps('graduationYear')}
 												data={['', ...new Array(5).fill(null).map((_, i) => (i + new Date().getFullYear()).toString())]}
 											/>
@@ -551,7 +571,7 @@ const Application: NextPage = () => {
 											<>
 												<Input.Label>Resume</Input.Label>
 												<Group>
-													<Link href={form.values.resume} target='_blank' rel='noopener noreferrer'>
+													<Link href={form.values.resume} target="_blank" rel="noopener noreferrer">
 														<Text style={{ color: '#148648', fontWeight: 'bold' }}>View</Text>
 													</Link>
 													<Button onClick={() => form.setFieldValue('resume', null)}>Replace</Button>
@@ -559,13 +579,13 @@ const Application: NextPage = () => {
 											</>
 										) : (
 											<FileInput
-												label='Upload your resume. PDF only!'
-												description='Resume is optional, but highly encouraged for your application.'
+												label="Upload your resume. PDF only!"
+												description="Resume is optional, but highly encouraged for your application."
 												{...form.getInputProps('resume')}
-												placeholder='Submit your resume'
-												accept='application/pdf'
+												placeholder="Click here to submit your resume"
+												accept="application/pdf"
 												descriptionProps={{
-													style: { color: 'white' }
+													style: { color: 'white' },
 												}}
 											/>
 										)}
@@ -575,7 +595,7 @@ const Application: NextPage = () => {
 											label={
 												<>
 													<span style={{ color: 'red' }}>*</span> I have read and agree to the{' '}
-													<a href='https://static.mlh.io/docs/mlh-code-of-conduct.pdf' target='_blank' rel='noopener noreferrer'>
+													<a href="https://static.mlh.io/docs/mlh-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer">
 														MLH Code of Conduct.
 													</a>
 												</>
@@ -588,19 +608,19 @@ const Application: NextPage = () => {
 												<>
 													<span style={{ color: 'red' }}>*</span> I authorize you to share my application/registration information
 													with Major League Hacking for event administration, ranking, and MLH administration inline with the{' '}
-													<a href='https://mlh.io/privacy' target='_blank' rel='noopener noreferrer'>
+													<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
 														MLH Privacy Policy
 													</a>
 													. I further I agree to the terms of both the{' '}
 													<a
-														href='https://github.com/MLH/mlh-policies/blob/main/contest-terms.md'
-														target='_blank'
-														rel='noopener noreferrer'
+														href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md"
+														target="_blank"
+														rel="noopener noreferrer"
 													>
 														MLH Contest Terms and Conditions
 													</a>{' '}
 													and the{' '}
-													<a href='https://mlh.io/privacy' target='_blank' rel='noopener noreferrer'>
+													<a href="https://mlh.io/privacy" target="_blank" rel="noopener noreferrer">
 														MLH Privacy Policy.
 													</a>
 												</>
@@ -608,14 +628,14 @@ const Application: NextPage = () => {
 											{...form.getInputProps('dataAgreement')}
 										/>
 										<Checkbox
-											label='I authorize MLH to send me an email where I can further opt into the MLH Hacker, Events, or Organizer
-												Newsletters and other communications from MLH'
+											label="I authorize MLH to send me an email where I can further opt into the MLH Hacker, Events, or Organizer
+												Newsletters and other communications from MLH"
 											{...form.getInputProps('mlhAgreement')}
 										/>
 
-										<Group position='right' mt='md'>
+										<Group position="right" mt="md">
 											<Button
-												variant='default'
+												variant="default"
 												disabled={submitted}
 												onClick={() => {
 													setStep(step - 1);
@@ -623,7 +643,7 @@ const Application: NextPage = () => {
 											>
 												Back
 											</Button>
-											<Button type='submit' loading={submitted}>
+											<Button type="submit" loading={submitted}>
 												Submit
 											</Button>
 										</Group>
