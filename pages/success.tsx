@@ -11,7 +11,7 @@ const Success = () => {
 				<Text align="center">Your application for PickHacks 2024 has been successfully submitted!</Text>
 				<Text align="center">
 					You will receive an email later to confirm your attendance. Please{' '}
-					<a href="google.com" target="_blank" rel="noopener noreferrer">
+					<a href="https://discord.gg/weJVRv4Rk9" target="_blank" rel="noopener noreferrer">
 						join our discord
 					</a>{' '}
 					to stay up to date with all announcements!

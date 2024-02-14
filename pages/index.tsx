@@ -393,6 +393,10 @@ const Application: NextPage = () => {
 							http.post('/api/users', applicationData)
 								.then(() => {
 									router.replace('/success');
+
+                                    if (!expired) {
+                                        notifications.hide(id);
+                                    }
 								})
 								.catch((err: AxiosError) => {
 									if (err.response) {
@@ -406,6 +410,7 @@ const Application: NextPage = () => {
 										if (!expired) {
 											notifications.hide(id);
 										}
+                                        setSubmitted(false);
 									}
 								});
 						}
