@@ -11,25 +11,10 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 				const existing = await collection.findOne({ email: data.email });
 
 				if (existing) {
-					const newApplication: Application = {
-						...data,
-						status: 'Admission Pending',
-						category: existing.category,
-						featured: existing.featured,
-						projectLink: existing.projectLink,
-						projectName: existing.projectName
-					};
-
-					await collection.findOneAndReplace({ _id: existing._id }, newApplication);
-
-					return res
-						.status(200)
-						.setHeader('Set-Cookie', `ph-registration::id=${existing._id.toHexString()}; Max-Age=${6 * 31 * 24 * 3600}`)
-						.json(newApplication);
+					return res.status(400).send('An application with that email already exists');
 				} else {
 					const application: Application = {
 						...data,
-						status: 'Admission Pending',
 						category: null,
 						featured: false,
 						projectLink: null,

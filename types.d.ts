@@ -2,7 +2,6 @@ type UserStatus = 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Con
 
 interface Application extends ApplicationData {
 	_id: import('mongodb').ObjectId;
-	status: UserStatus;
 }
 
 interface ApplicationData {

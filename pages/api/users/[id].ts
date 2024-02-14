@@ -6,22 +6,6 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 	const id = req.cookies['ph-registration::id'];
 
 	switch (req.method) {
-		case 'GET': {
-			const collection = await getData<Application>('applications');
-			const user = await collection.findOne({ _id: new ObjectId(id) });
-
-			if (!user) {
-				return res.status(400).send('Invalid id cookie');
-			}
-
-			if (req.query.id === id) {
-				const application = await collection.findOne({ _id: new ObjectId(req.query.id as string) });
-
-				return res.status(200).json(application);
-			} else {
-				return res.status(403).send("In the privacy interests of our hackers, only admins are allowed to view other users' data");
-			}
-		}
 		case 'POST': {
 			const collection = await getData<Application>('applications');
 			const user = await collection.findOne({ _id: new ObjectId(id) });
@@ -45,7 +29,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 			}
 		}
 		default:
-			res.status(405).json('Invalid Method; use GET');
+			res.status(405).json('Invalid Method; use POST');
 	}
 };
 
