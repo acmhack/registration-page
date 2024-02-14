@@ -1,27 +1,13 @@
-import {
-	Box,
-	Button,
-	Checkbox,
-	FileInput,
-	Group,
-	MultiSelect,
-	NativeSelect,
-	NumberInput,
-	Stack,
-	Stepper,
-	Switch,
-	Text,
-	TextInput,
-	Tooltip
-} from '@mantine/core';
+import { Box, Button, Checkbox, FileInput, Group, Input, MultiSelect, NativeSelect, NumberInput, Stack, Stepper, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconQuestionMark } from '@tabler/icons-react';
 import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { http } from '../utils/utils';
 
 interface FormValues {
@@ -38,7 +24,7 @@ interface FormValues {
 	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 	dietRestrictions: string[];
 	hackathonCount: string;
-	resume: File | null;
+	resume: File | string | null;
 	linkedin?: string;
 	github?: string;
 	otherSites: string[];
@@ -310,32 +296,29 @@ const Application: NextPage = () => {
 	const router = useRouter();
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 
-	// useEffect(() => {
-	// 	axios.get<Applicant>('/api/me').then((res) => {
-	// 		if (res.data.userStatus !== 'Profile Pending') {
-	// 			setDisabled(true);
-	// 		}
-	// 	});
-	// }, []);
+	useEffect(() => {
+		if (Cookies.get('ph-registration::id') !== undefined) {
+			http.get<ApplicationData>('/api/me').then((res) => {
+				const user = res.data;
+
+				form.setValues({ ...user, graduationYear: Number(user.graduationYear) });
+			});
+		}
+	}, [router, form]);
 
 	return (
 		<div style={{ paddingLeft: mobile ? '0px' : 'min(200px, 15vw)' }}>
 			<Box sx={{ maxWidth: 1200 }} mx="auto" p={16}>
 				<form
 					onSubmit={form.onSubmit((values) => {
-						if (form.values.resume) {
+						if (values.resume) {
 							const id: string = 'submitting-notification';
 							let expired: boolean = false;
 
-							const data = new FormData();
-							data.append('resume', form.values.resume!);
-							http.post<{ url: string }>('/api/resume', data).then((res) => {
-								const resumeURL = res.data.url;
-
+							if (typeof values.resume === 'string' || form.values.resume === null) {
 								const applicationData = {
 									...values,
-									graduationYear: values.graduationYear.toString(),
-									resume: resumeURL
+									graduationYear: values.graduationYear.toString()
 								};
 
 								http.post('/api/users', applicationData)
@@ -361,7 +344,43 @@ const Application: NextPage = () => {
 											}
 										}
 									});
-							});
+							} else {
+								const data = new FormData();
+								data.append('resume', form.values.resume!);
+								http.post<{ url: string }>('/api/resume', data).then((res) => {
+									const resumeURL = res.data.url;
+
+									const applicationData = {
+										...values,
+										graduationYear: values.graduationYear.toString(),
+										resume: resumeURL
+									};
+
+									http.post('/api/users', applicationData)
+										.then(() => {
+											router.replace('/dashboard');
+
+											if (!expired) {
+												notifications.hide(id);
+											}
+										})
+										.catch((err: AxiosError) => {
+											if (err.response) {
+												console.log(err.response.data);
+												notifications.show({
+													message: err.response.data as string,
+													title: 'Something went wrong...',
+													autoClose: 5000,
+													color: 'red'
+												});
+
+												if (!expired) {
+													notifications.hide(id);
+												}
+											}
+										});
+								});
+							}
 
 							notifications.show({
 								id,
@@ -399,24 +418,71 @@ const Application: NextPage = () => {
 									setStep(step);
 								}
 							}}>
-							<Stepper.Step label="Personal Info">
+							<Stepper.Step label="Contact Info">
 								<Box sx={{ maxWidth: 600 }} mx="auto">
 									<Stack>
-										<TextInput disabled={disabled} required label="First Name" {...form.getInputProps('firstName')} />
-										<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
-										<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
-										<NativeSelect
-											required
-											label="What is your age?"
-											data={['Prefer not to answer', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
-											{...form.getInputProps('age')}
-										/>
+										<Group grow={true}>
+											<TextInput disabled={disabled} required label="First Name" {...form.getInputProps('firstName')} />
+											<TextInput required label="Last Name" {...form.getInputProps('lastName')} />
+										</Group>
+										<Group grow={true}>
+											<TextInput required label="Email" placeholder="your@email.com" {...form.getInputProps('email')} />
+											<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
+										</Group>
+										<Group grow={true}>
+											<NativeSelect
+												required
+												label="What is your age?"
+												data={['Prefer not to answer', ...new Array(87).fill(null).map((_, i) => (i + 13).toString())]}
+												{...form.getInputProps('age')}
+											/>
+											<NativeSelect
+												required
+												label="Graduation Month"
+												data={[
+													'January',
+													'February',
+													'March',
+													'April',
+													'May',
+													'June',
+													'July',
+													'August',
+													'September',
+													'October',
+													'November',
+													'December'
+												]}
+												{...form.getInputProps('graduationMonth')}
+											/>
+											<NumberInput required label="Graduation Year" {...form.getInputProps('graduationYear')} />
+										</Group>
 										<NativeSelect
 											required
 											label="In which country do you currently reside?"
 											data={countries}
 											{...form.getInputProps('country')}
 										/>
+										<Group grow={true}>
+											<NativeSelect
+												required
+												label="T-Shirt Size"
+												{...form.getInputProps('shirtSize')}
+												data={['XS', 'S', 'M', 'L', 'XL', 'XXL']}
+											/>
+											<MultiSelect
+												label="Dietary Restrictions"
+												{...form.getInputProps('dietRestrictions')}
+												data={dietOptions}
+												searchable
+												creatable
+												getCreateLabel={(query) => query}
+												onCreate={(query) => {
+													setDietOptions([...dietOptions, query]);
+													return query;
+												}}
+											/>
+										</Group>
 										<Group spacing={0}>
 											<TextInput
 												required
@@ -430,119 +496,35 @@ const Application: NextPage = () => {
 										</Group>
 										<NativeSelect
 											required
-											label="In what type of educational institution are you currently enrolled in?"
+											label="In what type of educational institution are you currently enrolled?"
 											data={levelsOfStudy}
 											{...form.getInputProps('levelOfStudy')}
 										/>
-										<TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
-										<NativeSelect
-											required
-											label="Graduation Month"
-											data={[
-												'January',
-												'February',
-												'March',
-												'April',
-												'May',
-												'June',
-												'July',
-												'August',
-												'September',
-												'October',
-												'November',
-												'December'
-											]}
-											{...form.getInputProps('graduationMonth')}
-										/>
-										<NumberInput required label="Graduation Year" {...form.getInputProps('graduationYear')} />
-										<Group position="right" mt="md">
-											<Button
-												onClick={() => {
-													if (!form.validate().hasErrors) {
-														setStep(step + 1);
-													}
-												}}>
-												Next
-											</Button>
-										</Group>
-									</Stack>
-								</Box>
-							</Stepper.Step>
-							<Stepper.Step label="Prior Experience">
-								<Box sx={{ maxWidth: 600 }} mx="auto">
-									<Stack>
-										<NativeSelect
-											required
-											label="T-Shirt Size"
-											{...form.getInputProps('shirtSize')}
-											data={['XS', 'S', 'M', 'L', 'XL', 'XXL']}
-										/>
-										<MultiSelect
-											label="Dietary Restrictions"
-											{...form.getInputProps('dietRestrictions')}
-											data={dietOptions}
-											searchable
-											creatable
-											getCreateLabel={(query) => query}
-											onCreate={(query) => {
-												setDietOptions([...dietOptions, query]);
-												return query;
-											}}
-										/>
-										<NativeSelect
-											label="How many hackathons have you participated in?"
-											{...form.getInputProps('hackathonCount')}
-											data={['My first hackathon!', '1-3', '4-6', '7+']}
-										/>
 										{/* TODO: FileInput has a Capture prop has type boolean | "user" | "environment"
 										Add after we know hosting server and resume site api */}
-										<FileInput
-											label="Upload your resume. PDF only!"
-											description="Resume is optional, but highly encouraged for your application."
-											{...form.getInputProps('resume')}
-											placeholder="Submit resume"
-											accept="application/pdf"
-											descriptionProps={{
-												style: { color: 'black' }
-											}}
-										/>
-										<TextInput label="LinkedIn" {...form.getInputProps('linkedin')} />
-										<TextInput label="GitHub" {...form.getInputProps('github')} />
-										<MultiSelect
-											label="Other Sites"
-											{...form.getInputProps('otherSites')}
-											data={otherURLs}
-											searchable
-											creatable
-											getCreateLabel={(query) => `+ Add ${query}`}
-											onCreate={(query) => {
-												setOtherURLs([...form.values.otherSites, query]);
-												return query;
-											}}
-											rightSection={null}
-										/>
-										<Switch label="I am looking for a team" {...form.getInputProps('lookingForTeam')} />
-										<Switch
-											label={
-												<Group spacing={4}>
-													<Text>I am interested in attending the PreHacks event</Text>
-													<Tooltip
-														label="PreHacks is a beginner-friendly workshop hosted by the PickHacks' development team to cover web design, app design, and other topics to better prepare you for PickHacks! If you've never been to a hackathon or want to pick up some new skills, PreHacks is the perfect opportunity for you!"
-														multiline>
-														<IconQuestionMark size={18} />
-													</Tooltip>
+										{typeof form.values.resume === 'string' ? (
+											<>
+												<Input.Label>Resume</Input.Label>
+												<Group>
+													<Link href={form.values.resume} target="_blank" rel="noopener noreferrer">
+														<Text style={{ color: '#148648', fontWeight: 'bold' }}>View</Text>
+													</Link>
+													<Button onClick={() => form.setFieldValue('resume', null)}>Replace</Button>
 												</Group>
-											}
-											{...form.getInputProps('attendingPrehacks')}
-										/>
+											</>
+										) : (
+											<FileInput
+												label="Upload your resume. PDF only!"
+												description="Resume is optional, but highly encouraged for your application."
+												{...form.getInputProps('resume')}
+												placeholder="Submit resume"
+												accept="application/pdf"
+												descriptionProps={{
+													style: { color: 'black' }
+												}}
+											/>
+										)}
 										<Group position="right" mt="md">
-											<Button
-												variant="default"
-												onClick={() => {
-													setStep(step - 1);
-												}}>
-												Back
-											</Button>
 											<Button
 												onClick={() => {
 													if (!form.validate().hasErrors) {
@@ -558,6 +540,19 @@ const Application: NextPage = () => {
 							<Stepper.Step label="Consent">
 								<Box sx={{ maxWidth: 600 }} mx="auto">
 									<Stack>
+										{/* <Switch
+											label={
+												<Group spacing={4}>
+													<Text>I am interested in attending the PreHacks event</Text>
+													<Tooltip
+														label="PreHacks is a beginner-friendly workshop hosted by the PickHacks' development team to cover web design, app design, and other topics to better prepare you for PickHacks! If you've never been to a hackathon or want to pick up some new skills, PreHacks is the perfect opportunity for you!"
+														multiline>
+														<IconQuestionMark size={18} />
+													</Tooltip>
+												</Group>
+											}
+											{...form.getInputProps('attendingPrehacks')}
+										/> */}
 										<Checkbox
 											required
 											label={
