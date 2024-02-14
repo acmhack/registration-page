@@ -5,7 +5,6 @@ import { Notifications } from '@mantine/notifications';
 import { Merriweather_Sans } from 'next/font/google';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 
 const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ['300', '400', '700'] });
 
@@ -56,15 +55,6 @@ const Layout: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
 	const [opened, { toggle }] = useDisclosure(false);
 	const mobile = useMediaQuery('screen and (max-width: 700px)');
 	const router = useRouter();
-	const [admin, setAdmin] = useState<boolean>(false);
-
-	// useEffect(() => {
-	// 	if (user) {
-	// 		axios.get<DBEntry>(`/api/users/${user.sub}`).then((res) => {
-	// 			setAdmin(res.data.admin);
-	// 		});
-	// 	}
-	// }, [user]);
 
 	return (
 		<>
@@ -91,13 +81,6 @@ const Layout: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
 												Application
 											</Link>
 										</Navbar.Section>
-										{admin && (
-											<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-												<Link href="/admin" onClick={toggle} className={MerriweatherFont.className} style={{ fontWeight: 'bold' }}>
-													Admin
-												</Link>
-											</Navbar.Section>
-										)}
 										<Navbar.Section sx={NAV_LINK_STYLE}>
 											<a href="/api/auth/logout" onClick={toggle} className={MerriweatherFont.className} style={{ fontWeight: 'bold' }}>
 												Logout
@@ -122,16 +105,6 @@ const Layout: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
 										Application
 									</Link>
 								</Navbar.Section>
-								{/* <Navbar.Section className={router.route === '/team' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-									<Link href="/team">Team</Link>
-								</Navbar.Section> */}
-								{admin && (
-									<Navbar.Section className={router.route === '/admin' ? 'active' : ''} sx={NAV_LINK_STYLE}>
-										<Link href="/admin" className={MerriweatherFont.className} style={{ fontWeight: 'bold' }}>
-											Admin
-										</Link>
-									</Navbar.Section>
-								)}
 								<Navbar.Section sx={NAV_LINK_STYLE}>
 									<a href="/api/auth/logout" className={MerriweatherFont.className} style={{ fontWeight: 'bold' }}>
 										Logout

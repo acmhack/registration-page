@@ -3,7 +3,6 @@ type UserStatus = 'Admission Pending' | 'Confirmation Pending' | 'Denied' | 'Con
 interface Application extends ApplicationData {
 	_id: import('mongodb').ObjectId;
 	status: UserStatus;
-	admin: boolean;
 }
 
 interface ApplicationData {
@@ -19,17 +18,11 @@ interface ApplicationData {
 	graduationYear: string;
 	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 	dietRestrictions: string[];
-	hackathonCount: string;
 	resume: string | null;
-	linkedin?: string;
-	github?: string;
-	otherSites: string[];
-	attendingPrehacks: boolean;
-	lookingForTeam: boolean;
+	// attendingPrehacks: boolean;
 	codeOfConductAgreement: boolean;
 	dataAgreement: boolean;
 	mlhAgreement: boolean;
-
 	category: string | null;
 	featured: boolean;
 	projectLink: string | null;

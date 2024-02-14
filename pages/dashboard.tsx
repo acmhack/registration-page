@@ -1,4 +1,4 @@
-import { Anchor, Button, Flex, Group, Image, MediaQuery, Stack, Switch, Text, Title } from '@mantine/core';
+import { Anchor, Button, Flex, Group, Image, MediaQuery, Stack, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { AxiosError } from 'axios';
@@ -7,41 +7,15 @@ import { Merriweather_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import { calculateRemainingTime, http } from '../utils/utils';
 
 const WelcomeFont = localFont({ src: './fonts/IntroScript.otf' });
 const MerriweatherFont = Merriweather_Sans({ subsets: ['latin'], weight: ['300', '400', '700'] });
 
-interface Applicant {
-	firstName: string;
-	lastName: string;
-	email: string;
-	userStatus: UserStatus;
-	age: string;
-	phoneNumber: string;
-	country: string;
-	school: string;
-	levelOfStudy: string;
-	graduationMonth: string;
-	graduationYear: string;
-	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
-	dietRestrictions: string[];
-	hackathonCount: string;
-	resume: string | null;
-	linkedin?: string;
-	github?: string;
-	otherSites: string[];
-	attendingPrehacks: boolean;
-	lookingForTeam: boolean;
-	codeOfConductAgreement: boolean;
-	dataAgreement: boolean;
-	mlhAgreement: boolean;
-}
-
 const Status: FC<{
-	applicant: Applicant;
+	applicant: Application;
 	onConfirm: () => void;
 	confirming: boolean;
 	smol: boolean;
@@ -52,7 +26,7 @@ const Status: FC<{
 				PickHacks Checklist
 			</Title>
 			<Group bg={'rgba(12, 135, 70, .8)'} style={{ borderRadius: 45 }} p={smol ? 15 : 22} w="100%" position="center">
-				{applicant.userStatus === 'Admission Pending' && (
+				{applicant.status === 'Admission Pending' && (
 					<Text color="white" weight="bold" className={MerriweatherFont.className} fz={smol ? 15 : 18}>
 						Profile Completed
 					</Text>
@@ -60,7 +34,7 @@ const Status: FC<{
 			</Group>
 			<Group
 				w="100%"
-				bg={applicant.userStatus !== 'Admission Pending' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
+				bg={applicant.status !== 'Admission Pending' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
 				style={{ borderRadius: 45 }}
 				p={smol ? 15 : 22}
 				position="center">
@@ -70,16 +44,16 @@ const Status: FC<{
 			</Group>
 			<Group
 				w="100%"
-				bg={applicant.userStatus === 'Confirmed' || applicant.userStatus === 'Checked In' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
+				bg={applicant.status === 'Confirmed' || applicant.status === 'Checked In' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
 				style={{ borderRadius: 45 }}
 				p={smol ? 15 : 22}
 				position="center">
-				{applicant.userStatus !== 'Confirmation Pending' && (
+				{applicant.status !== 'Confirmation Pending' && (
 					<Text color="white" weight={'bold'} className={MerriweatherFont.className} fz={smol ? 15 : 18}>
 						Confirmed
 					</Text>
 				)}
-				{applicant.userStatus === 'Confirmation Pending' && (
+				{applicant.status === 'Confirmation Pending' && (
 					<Group>
 						<Button compact loading={confirming} onClick={onConfirm}>
 							I will attend!
@@ -89,7 +63,7 @@ const Status: FC<{
 			</Group>
 			<Group
 				w="100%"
-				bg={applicant.userStatus === 'Checked In' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
+				bg={applicant.status === 'Checked In' ? 'rgba(12, 135, 70, .8)' : 'rgba(27, 90, 127, .4)'}
 				style={{ borderRadius: 45 }}
 				p={smol ? 15 : 22}
 				position="center">
@@ -104,36 +78,16 @@ const Status: FC<{
 const Dashboard: NextPage = () => {
 	const router = useRouter();
 	const [confirming, setConfirming] = useState<boolean>(false);
-	const [lft, setLFT] = useState<boolean>(false);
-	const [togglingLFT, setTogglingLFT] = useState<boolean>(false);
 	const [[days, hours, minutes, seconds], setCountdown] = useState<[number, number, number, number]>(calculateRemainingTime());
-	const [applicant, setApplicant] = useState<Applicant | null>(null);
+	const [applicant, setApplicant] = useState<Application | null>(null);
 	const smol = useMediaQuery('screen and (max-width: 700px)');
-
-	const toggleLFT = useCallback(() => {
-		setTogglingLFT(true);
-		http.post('/api/lft')
-			.then(() => {
-				setLFT((lft) => !lft);
-			})
-			.catch((err: AxiosError) => {
-				if (err.response) {
-					console.log(err.response);
-					notifications.show({ message: err.response.data as string, title: 'Something went wrong...', autoClose: 5000, color: 'red' });
-				}
-			})
-			.finally(() => {
-				setTogglingLFT(false);
-			});
-	}, []);
 
 	useEffect(() => {
 		if (Cookies.get('ph-registration::id') === undefined) {
 			router.replace('/application');
 		} else {
-			http.get<Applicant>('/api/me').then((res) => {
+			http.get<Application>('/api/me').then((res) => {
 				setApplicant(res.data);
-				setLFT(res.data.lookingForTeam);
 			});
 		}
 	}, [router]);
@@ -156,7 +110,7 @@ const Dashboard: NextPage = () => {
 		);
 	}
 
-	if (applicant.userStatus === 'Denied') {
+	if (applicant.status === 'Denied') {
 		return (
 			<div>
 				<Title color="red">Sorry, your application has been denied.</Title>
@@ -230,7 +184,6 @@ const Dashboard: NextPage = () => {
 								Team Status
 							</Title>
 							<Group position="center" noWrap bg="rgba(12, 135, 70, .8)" w={302} p={smol ? 15 : 22} align="center" style={{ borderRadius: 45 }}>
-								<Switch disabled={togglingLFT} onChange={toggleLFT} checked={lft} color={'cyan.9'} />
 								<Text
 									color="white"
 									className={MerriweatherFont.className}

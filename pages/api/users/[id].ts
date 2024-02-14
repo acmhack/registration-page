@@ -14,7 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 				return res.status(400).send('Invalid id cookie');
 			}
 
-			if (user.admin || req.query.id === id) {
+			if (req.query.id === id) {
 				const application = await collection.findOne({ _id: new ObjectId(req.query.id as string) });
 
 				return res.status(200).json(application);
@@ -31,7 +31,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 				return res.status(400).send('Invalid id cookie');
 			}
 
-			if (user.admin || id === req.query.id) {
+			if (id === req.query.id) {
 				try {
 					const result = await collection.findOneAndUpdate({ _id: new ObjectId(req.query.id as string) }, { $set: data });
 

@@ -14,22 +14,17 @@ interface FormValues {
 	firstName: string;
 	lastName: string;
 	email: string;
-	age: string;
 	phoneNumber: string;
-	country: string;
-	school: string;
-	levelOfStudy: string;
+	age: string;
 	graduationMonth: string;
 	graduationYear: number;
+	country: string;
 	shirtSize: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 	dietRestrictions: string[];
-	hackathonCount: string;
+	school: string;
+	levelOfStudy: string;
 	resume: File | string | null;
-	linkedin?: string;
-	github?: string;
-	otherSites: string[];
-	attendingPrehacks: boolean;
-	lookingForTeam: boolean;
+	// attendingPrehacks: boolean;
 	codeOfConductAgreement: boolean;
 	dataAgreement: boolean;
 	mlhAgreement: boolean;
@@ -261,14 +256,9 @@ const Application: NextPage = () => {
 			graduationYear: new Date().getFullYear(),
 			graduationMonth: 'May',
 			shirtSize: 'M',
-			hackathonCount: 'My first hackathon!',
 			resume: null,
-			linkedin: '',
-			github: '',
-			otherSites: [],
 			dietRestrictions: [],
-			attendingPrehacks: false,
-			lookingForTeam: false,
+			// attendingPrehacks: false,
 			codeOfConductAgreement: false,
 			dataAgreement: false,
 			mlhAgreement: false
@@ -282,13 +272,9 @@ const Application: NextPage = () => {
 				value === '' || value === undefined || /^\d{10}$/.test(value) ? null : 'Invalid phone number (must be in format xxxyyyzzzz)',
 			graduationYear: (value) => (/^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
 			graduationMonth: (value) => (value === '' ? 'Please select a graduation month' : null),
-			school: (value) => (value === '' ? 'Please enter your school' : null),
-			linkedin: (value) =>
-				value === '' || value === undefined || /^https:\/\/(www\.)?linkedin\.com\/in\/\S+$/.test(value) ? null : 'Invalid LinkedIn URL',
-			github: (value) => (value === '' || value === undefined || /^https:\/\/(www\.)?github\.com\/\S+$/.test(value) ? null : 'Invalid GitHub URL')
+			school: (value) => (value === '' ? 'Please enter your school' : null)
 		}
 	});
-	const [otherURLs, setOtherURLs] = useState<string[]>([]);
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
 	const [submitted, setSubmitted] = useState<boolean>(false);
