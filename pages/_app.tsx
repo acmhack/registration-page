@@ -1,7 +1,7 @@
 import { MantineProvider, Tuple } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import Layout from '../components/Layout';
 
 export default function App(props: AppProps) {
 	const { Component, pageProps } = props;
@@ -10,8 +10,8 @@ export default function App(props: AppProps) {
 		<>
 			<Head>
 				<title>PickHacks Registration</title>
-				<meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width' />
-				<link rel='shortcut icon' href='favicon.ico' />
+				<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+				<link rel="shortcut icon" href="favicon.ico" />
 			</Head>
 
 			<MantineProvider
@@ -43,8 +43,8 @@ export default function App(props: AppProps) {
 						]
 					},
 					primaryColor: 'pink'
-				}}
-			>
+				}}>
+				<Notifications position="top-right" />
 				{/* <Layout> */}
 				<Component {...pageProps} />
 				{/* </Layout> */}
@@ -52,3 +52,4 @@ export default function App(props: AppProps) {
 		</>
 	);
 }
+
