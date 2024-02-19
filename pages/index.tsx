@@ -225,7 +225,7 @@ const countries = [
 	'Vietnam',
 	'Yemen',
 	'Zambia',
-	'Zimbabwe'
+	'Zimbabwe',
 ];
 
 const levelsOfStudy: string[] = [
@@ -239,10 +239,21 @@ const levelsOfStudy: string[] = [
 	'Other Vocational/Trade Program/Apprenticeship',
 	'Other',
 	"I'm currently not a student",
-	'Prefer not to answer'
+	'Prefer not to answer',
 ];
 
-const schools: string[] = ['', 'Missouri S&T', 'UMSL', 'Truman State University', 'Mizzou', 'Other'];
+const schools: string[] = [
+	'',
+	'Missouri S&T',
+	'Mizzou',
+	'Truman State University',
+	'College of the Ozarks',
+	'UMSL',
+	'WashU',
+	'Missouri State University',
+	'SEMO',
+	'Other',
+];
 
 const Application: NextPage = () => {
 	const form = useForm<FormValues>({
@@ -263,7 +274,7 @@ const Application: NextPage = () => {
 			// attendingPrehacks: false,
 			codeOfConductAgreement: false,
 			dataAgreement: false,
-			mlhAgreement: false
+			mlhAgreement: false,
 		},
 		validate: {
 			firstName: (value) => (value === '' ? 'Please enter your first name' : null),
@@ -274,8 +285,8 @@ const Application: NextPage = () => {
 			shirtSize: (value) => (value === '' ? 'Please select a shirt size' : null),
 			graduationYear: (value) => (step < 2 ? null : /^\d{4}$/.test(value.toString()) ? null : 'Invalid graduation year'),
 			graduationMonth: (value) => (step < 2 ? null : value === '' ? 'Please select a graduation month' : null),
-			school: (value) => (step < 2 ? null : value === '' ? 'Please enter your school' : null)
-		}
+			school: (value) => (step < 2 ? null : value === '' ? 'Please enter your school' : null),
+		},
 	});
 	const [dietOptions, setDietOptions] = useState<string[]>(['Vegetarian', 'Vegan', 'Gluten Free', 'Nut Allergy', 'Kosher', 'Halal']);
 	const [step, setStep] = useState<number>(0);
@@ -306,8 +317,9 @@ const Application: NextPage = () => {
 						background: 'linear-gradient(45deg, #fc77d9 0%, #a369f5 40%, #544bd6 65%, #5c52e0 92%)',
 						WebkitBackgroundClip: 'text',
 						WebkitTextFillColor: 'transparent',
-						fontSize: '1.3em'
-					}}>
+						fontSize: '1.3em',
+					}}
+				>
 					PickHacks 2024
 				</Text>
 			</Group>
@@ -321,7 +333,7 @@ const Application: NextPage = () => {
 							if (typeof values.resume === 'string' || form.values.resume === null) {
 								const applicationData = {
 									...values,
-									graduationYear: values.graduationYear.toString()
+									graduationYear: values.graduationYear.toString(),
 								};
 
 								http.post('/api/users', applicationData)
@@ -339,7 +351,7 @@ const Application: NextPage = () => {
 												message: err.response.data as string,
 												title: 'Something went wrong...',
 												autoClose: 5000,
-												color: 'red'
+												color: 'red',
 											});
 
 											if (!expired) {
@@ -356,7 +368,7 @@ const Application: NextPage = () => {
 									const applicationData = {
 										...values,
 										graduationYear: values.graduationYear,
-										resume: resumeURL
+										resume: resumeURL,
 									};
 
 									http.post('/api/users', applicationData)
@@ -374,7 +386,7 @@ const Application: NextPage = () => {
 													message: err.response.data as string,
 													title: 'Something went wrong...',
 													autoClose: 5000,
-													color: 'red'
+													color: 'red',
 												});
 
 												if (!expired) {
@@ -387,16 +399,16 @@ const Application: NextPage = () => {
 						} else {
 							const applicationData = {
 								...values,
-								graduationYear: values.graduationYear.toString()
+								graduationYear: values.graduationYear.toString(),
 							};
 
 							http.post('/api/users', applicationData)
 								.then(() => {
 									router.replace('/success');
 
-                                    if (!expired) {
-                                        notifications.hide(id);
-                                    }
+									if (!expired) {
+										notifications.hide(id);
+									}
 								})
 								.catch((err: AxiosError) => {
 									if (err.response) {
@@ -404,13 +416,13 @@ const Application: NextPage = () => {
 											message: err.response.data as string,
 											title: 'Something went wrong...',
 											autoClose: 5000,
-											color: 'red'
+											color: 'red',
 										});
 
 										if (!expired) {
 											notifications.hide(id);
 										}
-                                        setSubmitted(false);
+										setSubmitted(false);
 									}
 								});
 						}
@@ -422,10 +434,11 @@ const Application: NextPage = () => {
 							loading: true,
 							color: 'green',
 							autoClose: 5000,
-							onClose: () => (expired = true)
+							onClose: () => (expired = true),
 						});
 						setSubmitted(true);
-					})}>
+					})}
+				>
 					<fieldset disabled={disabled} style={{ border: 0 }}>
 						<Stepper
 							active={step}
@@ -433,7 +446,8 @@ const Application: NextPage = () => {
 								if (!form.validate().hasErrors) {
 									setStep(step);
 								}
-							}}>
+							}}
+						>
 							<Stepper.Step label="Contact Info">
 								<Box sx={{ maxWidth: 700, marginTop: '3%' }} mx="auto">
 									<Stack sx={{ gap: '1.5em' }}>
@@ -447,7 +461,7 @@ const Application: NextPage = () => {
 												maxLength={10}
 												required
 												label="Phone Number"
-												placeholder="0123456789"
+												placeholder="1234567890"
 												{...form.getInputProps('phoneNumber')}
 											/>
 										</Group>
@@ -490,7 +504,8 @@ const Application: NextPage = () => {
 													if (!form.validate().hasErrors) {
 														setStep(step + 1);
 													}
-												}}>
+												}}
+											>
 												Next
 											</Button>
 										</Group>
@@ -561,7 +576,7 @@ const Application: NextPage = () => {
 													'September',
 													'October',
 													'November',
-													'December'
+													'December',
 												]}
 												{...form.getInputProps('graduationMonth')}
 											/>
@@ -593,7 +608,7 @@ const Application: NextPage = () => {
 												placeholder="Click here to submit your resume"
 												accept="application/pdf"
 												descriptionProps={{
-													style: { color: 'white' }
+													style: { color: 'white' },
 												}}
 											/>
 										)}
@@ -623,7 +638,8 @@ const Application: NextPage = () => {
 													<a
 														href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md"
 														target="_blank"
-														rel="noopener noreferrer">
+														rel="noopener noreferrer"
+													>
 														MLH Contest Terms and Conditions
 													</a>{' '}
 													and the{' '}
@@ -646,7 +662,8 @@ const Application: NextPage = () => {
 												disabled={submitted}
 												onClick={() => {
 													setStep(step - 1);
-												}}>
+												}}
+											>
 												Back
 											</Button>
 											<Button type="submit" loading={submitted}>
@@ -665,4 +682,3 @@ const Application: NextPage = () => {
 };
 
 export default Application;
-
