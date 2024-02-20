@@ -38,4 +38,3 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 		}
 	}
 };
-
