@@ -342,6 +342,9 @@ const Application: NextPage = () => {
 							if (typeof values.resume === 'string' || form.values.resume === null) {
 								const applicationData = {
 									...values,
+                                    firstName: values.firstName.trim(),
+                                    lastName: values.lastName.trim(),
+                                    school: values.school.trim(),
 									graduationYear: values.graduationYear.toString()
 								};
 
@@ -376,7 +379,10 @@ const Application: NextPage = () => {
 
 									const applicationData = {
 										...values,
+                                        firstName: values.firstName.trim(),
+                                        lastName: values.lastName.trim(),
 										graduationYear: values.graduationYear,
+                                        school: values.school.trim(),
 										resume: resumeURL
 									};
 
@@ -408,6 +414,9 @@ const Application: NextPage = () => {
 						} else {
 							const applicationData = {
 								...values,
+                                firstName: values.firstName.trim(),
+                                lastName: values.lastName.trim(),
+                                school: values.school.trim(),
 								graduationYear: values.graduationYear.toString()
 							};
 
