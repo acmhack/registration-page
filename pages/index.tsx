@@ -311,7 +311,12 @@ const Application: NextPage = () => {
 
 	return (
 		<div>
-			<Group sx={{ position: 'absolute' }} top={25} left={25}>
+			<a
+				href='https://pickhacks.io'
+				target='_blank'
+                rel="noreferrer"
+				style={{ display: 'flex', gap: '1em', position: 'absolute', top: '25px', left: '25px', textDecoration: 'none' }}
+			>
 				<img src='/Logo2024.png' height={35} width={35}></img>
 				<Text
 					weight={'bold'}
@@ -324,7 +329,9 @@ const Application: NextPage = () => {
 				>
 					PickHacks 2024
 				</Text>
-			</Group>
+			</a>
+
+			{/* </Group> */}
 			<Box sx={{ maxWidth: 1200 }} mx='auto' p={16} pt={90}>
 				<form
 					onSubmit={form.onSubmit((values) => {
