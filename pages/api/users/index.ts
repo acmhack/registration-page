@@ -15,6 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 				} else {
 					const application: Application = {
 						...data,
+                        school: data.school === 'Missouri University of Science and Technology' ? 'Missouri S&T' : data.school === 'University of Missouri' ? 'Mizzou' : data.school,
 						category: null,
 						featured: false,
 						projectLink: null,
